@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Samarth Madhivanan</title>
+<meta name="description" content="Notes from the build by Samarth Madhivanan — thoughts on AI, agents, automation and whatever else crosses his mind.">
+<link rel="canonical" href="https://samarthmadhivanan.com/blog.html">
+<meta name="theme-color" content="#1f3a2a">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://samarthmadhivanan.com/blog.html">
+<meta property="og:title" content="Blog — Samarth Madhivanan">
+<meta property="og:description" content="Notes from the build — thoughts on AI, agents and automation.">
+<meta property="og:image" content="https://samarthmadhivanan.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Blog — Samarth Madhivanan">
+<meta name="twitter:description" content="Notes from the build.">
+<meta name="twitter:image" content="https://samarthmadhivanan.com/og.png">
+<link rel="stylesheet" href="site.css">
+<style>
+.blog-head { background: var(--rose); border-bottom: 2px solid var(--ink); color: var(--ink); }
+.blog-head .page-title { color: var(--ink); text-shadow: 2px 0 0 var(--bone), -2px 0 0 var(--bone), 0 2px 0 var(--bone), 0 -2px 0 var(--bone), 4px 4px 0 var(--bone), 6px 6px 0 var(--ink), 8px 8px 0 var(--terra), 10px 10px 0 var(--ink); }
+.blog-head .page-lede { color: rgba(20,18,16,0.78); }
+.blog-head .page-lede strong { color: var(--forest); background: var(--bone); padding: 0 5px; }
+.blog-head .eyebrow { color: var(--forest); }
+.feed { padding: 74px 40px 90px; }
+.feed-wrap { max-width: 1000px; margin: 0 auto; }
+.feed-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 34px; }
+.feed-count { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: rgba(20,18,16,0.55); }
+.plist { border-top: 2px solid var(--ink); }
+.post-row { display: grid; grid-template-columns: 60px 1fr auto; gap: 26px; padding: 30px 0; border-bottom: 2px solid var(--ink); align-items: start; cursor: pointer; transition: background 0.2s, padding-left 0.2s; text-decoration: none; color: inherit; }
+.post-row:hover { background: var(--cream-2); padding-left: 12px; color: inherit; }
+.post-num { font-family: 'Anton', sans-serif; font-size: 30px; line-height: 1; color: var(--terra); }
+.post-date { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: rgba(20,18,16,0.55); margin-bottom: 8px; }
+.post-title { font-family: 'Anton', sans-serif; font-size: clamp(26px, 3vw, 40px); line-height: 1; text-transform: uppercase; margin-bottom: 10px; }
+.post-excerpt { font-size: 16px; line-height: 1.55; color: rgba(20,18,16,0.72); max-width: 60ch; margin-bottom: 12px; }
+.post-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.post-tags span { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--line-2); color: rgba(20,18,16,0.62); }
+.post-meta-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.post-read { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(20,18,16,0.5); white-space: nowrap; }
+.draft-flag { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; background: var(--mustard); border: 1px solid var(--ink); padding: 3px 7px; }
+.row-admin { display: flex; gap: 6px; }
+.empty-state { border: 2px dashed var(--line-2); padding: 54px 30px; text-align: center; }
+.empty-state h3 { font-family: 'Anton', sans-serif; font-size: 32px; text-transform: uppercase; margin-bottom: 10px; }
+.empty-state p { color: rgba(20,18,16,0.65); max-width: 44ch; margin: 0 auto; }
+/* article */
+.article { padding: 66px 40px 92px; display: none; }
+.article.is-on { display: block; }
+.article-wrap { max-width: 720px; margin: 0 auto; }
+.back-link { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--forest); text-decoration: none; border-bottom: 2px solid var(--forest); padding-bottom: 2px; }
+.back-link:hover { color: var(--terra); border-color: var(--terra); }
+.article h1 { font-family: 'Anton', sans-serif; font-size: clamp(38px, 5.6vw, 68px); line-height: 0.94; text-transform: uppercase; margin: 26px 0 16px; text-wrap: balance; }
+.article-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1.8px; text-transform: uppercase; color: rgba(20,18,16,0.55); padding-bottom: 22px; border-bottom: 2px solid var(--ink); margin-bottom: 30px; }
+.article-body { font-size: 18px; line-height: 1.68; }
+.article-body p { margin-bottom: 22px; }
+.article-body h2 { font-family: 'Anton', sans-serif; font-size: 30px; text-transform: uppercase; margin: 38px 0 14px; }
+.article-body h3 { font-family: 'Archivo Black', sans-serif; font-size: 19px; margin: 30px 0 12px; }
+.article-body ul { margin: 0 0 22px 22px; }
+.article-body li { margin-bottom: 8px; }
+.article-body blockquote { border-left: 4px solid var(--terra); padding-left: 18px; margin: 0 0 22px; font-size: 20px; line-height: 1.5; }
+.article-body code { font-family: 'JetBrains Mono', monospace; font-size: 15px; background: var(--cream-2); border: 1px solid var(--line); padding: 2px 6px; }
+.article-body strong { background: var(--lime); padding: 0 4px; }
+/* admin */
+.admin-bar { background: var(--forest); border-bottom: 2px solid var(--ink); padding: 14px 40px; display: none; position: sticky; top: 72px; z-index: 90; }
+.admin-bar.is-on { display: block; }
+.admin-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.admin-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--lime); font-weight: 700; margin-right: 8px; }
+.admin-note { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; color: rgba(244,236,216,0.6); margin-left: auto; }
+.editor { padding: 60px 40px 90px; display: none; }
+.editor.is-on { display: block; }
+.editor-wrap { max-width: 820px; margin: 0 auto; background: var(--bone); border: 2px solid var(--ink); box-shadow: 10px 10px 0 var(--ink); padding: 34px; }
+.editor h2 { font-family: 'Anton', sans-serif; font-size: 36px; text-transform: uppercase; margin-bottom: 24px; }
+.field { margin-bottom: 20px; }
+.field label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: rgba(20,18,16,0.62); margin-bottom: 7px; font-weight: 500; }
+.field input[type=text], .field input[type=date], .field textarea, .field select {
+  width: 100%; font-family: 'Inter', sans-serif; font-size: 16px; color: var(--ink);
+  background: var(--cream-2); border: 2px solid var(--ink); padding: 12px 14px;
+}
+.field textarea { min-height: 300px; resize: vertical; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.6; }
+.field .hint { font-size: 12px; color: rgba(20,18,16,0.55); margin-top: 6px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.editor-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.gate { padding: 80px 40px; display: none; }
+.gate.is-on { display: block; }
+.gate-wrap { max-width: 460px; margin: 0 auto; background: var(--bone); border: 2px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); padding: 32px; text-align: center; }
+.gate-wrap h2 { font-family: 'Anton', sans-serif; font-size: 32px; text-transform: uppercase; margin-bottom: 8px; }
+.gate-wrap p { font-size: 14px; color: rgba(20,18,16,0.65); margin-bottom: 20px; }
+.gate-wrap input { width: 100%; font-size: 16px; background: var(--cream-2); border: 2px solid var(--ink); padding: 12px 14px; margin-bottom: 16px; font-family: 'Inter', sans-serif; }
+.gate-err { color: var(--terra); font-size: 13px; font-weight: 600; min-height: 20px; margin-bottom: 10px; }
+.footer-admin { background: none; border: none; color: rgba(244,236,216,0.35); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; padding: 0; }
+.footer-admin:hover { color: var(--terra); }
+@media (max-width: 720px) {
+  .feed { padding: 46px 22px 62px; }
+  .article { padding: 40px 22px 62px; }
+  .admin-bar { padding: 12px 22px; top: 64px; }
+  .editor { padding: 40px 22px 62px; }
+  .editor-wrap { padding: 22px; }
+  .gate { padding: 50px 22px; }
+  .post-row { grid-template-columns: 40px 1fr; gap: 16px; }
+  .post-meta-right { grid-column: 1 / -1; align-items: flex-start; flex-direction: row; }
+  .field-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">SAMARTH<span class="dot">.</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Work</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="blog.html" class="active">Blog</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="contact.html" class="nav-cta">Let's Talk <span>»</span></a>
+    <button class="nav-toggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<div class="admin-bar" id="adminBar">
+  <div class="admin-inner">
+    <span class="admin-tag">// Admin mode</span>
+    <button class="btn btn-sm" id="newPostBtn">+ New post</button>
+    <button class="btn btn-sm" id="exportBtn">Export JSON</button>
+    <button class="btn btn-sm" id="importBtn">Import JSON</button>
+    <button class="btn btn-sm" id="lockBtn">Lock</button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+    <span class="admin-note">Saved in this browser only</span>
+  </div>
+</div>
+
+<section class="page-head blog-head" id="blogHead">
+  <div class="page-head-wrap">
+    <div class="eyebrow">Notes from the build</div>
+    <h1 class="page-title">Blog</h1>
+    <p class="page-lede">Where I jot down my thoughts on AI — and <strong>everything else that crosses my mind on a random Tuesday.</strong></p>
+  </div>
+</section>
+
+<section class="feed" id="feedView">
+  <div class="feed-wrap">
+    <div class="feed-top">
+      <div>
+        <div class="eyebrow">Latest</div>
+        <h2 class="section-heading" style="margin-bottom: 0;">Recent <span class="hi-lime">Writing</span></h2>
+      </div>
+      <div class="feed-count" id="feedCount"></div>
+    </div>
+    <div class="plist" id="postList"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <h3>Nothing published yet</h3>
+      <p>First post is on its way.</p>
+    </div>
+  </div>
+</section>
+
+<article class="article" id="articleView">
+  <div class="article-wrap">
+    <a href="#" class="back-link" id="backLink">← All posts</a>
+    <h1 id="articleTitle"></h1>
+    <div class="article-meta" id="articleMeta"></div>
+    <div class="article-body" id="articleBody"></div>
+  </div>
+</article>
+
+<section class="editor" id="editorView">
+  <div class="editor-wrap">
+    <h2 id="editorTitle">New post</h2>
+    <div class="field">
+      <label for="fTitle">Title</label>
+      <input type="text" id="fTitle" placeholder="What did you learn?">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="fDate">Date</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="field">
+        <label for="fStatus">Status</label>
+        <select id="fStatus">
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="fTags">Tags</label>
+      <input type="text" id="fTags" placeholder="agents, evaluation, tokens">
+      <div class="hint">Comma separated.</div>
+    </div>
+    <div class="field">
+      <label for="fExcerpt">Excerpt</label>
+      <input type="text" id="fExcerpt" placeholder="One line that makes someone click.">
+    </div>
+    <div class="field">
+      <label for="fBody">Body</label>
+      <textarea id="fBody" placeholder="Write here.&#10;&#10;## A heading&#10;&#10;Normal paragraph with **highlighted** text and `code`.&#10;&#10;- a list item&#10;- another&#10;&#10;&gt; a pull quote"></textarea>
+      <div class="hint">Blank line between paragraphs. <code>##</code> heading, <code>###</code> subheading, <code>-</code> list, <code>&gt;</code> quote, <code>**bold**</code>, <code>`code`</code>.</div>
+    </div>
+    <div class="editor-actions">
+      <button class="btn btn-forest" id="saveBtn">Save post</button>
+      <button class="btn" id="cancelBtn">Cancel</button>
+      <button class="btn" id="deleteBtn" style="display:none;">Delete</button>
+    </div>
+  </div>
+</section>
+
+<section class="gate" id="gateView">
+  <div class="gate-wrap">
+    <h2 id="gateTitle">Admin</h2>
+    <p id="gateCopy">Enter your passphrase to manage posts.</p>
+    <input type="password" id="gatePass" placeholder="Passphrase">
+    <div class="gate-err" id="gateErr"></div>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn btn-forest" id="gateGo">Unlock</button>
+      <button class="btn" id="gateCancel">Cancel</button>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">SAMARTH MADHIVANAN<span class="dot">.</span></div>
+      <p class="footer-tagline">AI/ML Analyst at KPMG — Digital Lighthouse, Mumbai. AI systems and workflow automation for businesses and individuals.</p>
+    </div>
+    <div>
+      <div class="footer-col-head">Work</div>
+      <ul class="footer-links">
+        <li><a href="projects.html">Agentic AI</a></li>
+        <li><a href="projects.html">Workflow Automation</a></li>
+        <li><a href="projects.html">Data Tools</a></li>
+        <li><a href="contact.html">Consulting</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-head">Site</div>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-head">Connect</div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/samarthm04" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/samarth-madhivanan" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="contact.html">Email</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>Built by Samarth Madhivanan. All rights reserved.</span>
+    <button class="footer-admin" id="adminToggle">Admin</button>
+    <span>© 2026 · Mumbai</span>
+  </div>
+</footer>
+
+<script src="blog.js"></script>
+<script src="nav.js"></script>
+
+</body>
+</html>

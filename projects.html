@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — Samarth Madhivanan</title>
+<meta name="description" content="Selected projects by Samarth Madhivanan: agentic AI, data tooling, computer vision and clinical NLP. Each one links to its public GitHub repo.">
+<link rel="canonical" href="https://samarthmadhivanan.com/projects.html">
+<meta name="theme-color" content="#1f3a2a">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://samarthmadhivanan.com/projects.html">
+<meta property="og:title" content="Projects — Samarth Madhivanan">
+<meta property="og:description" content="Agentic AI, data tooling, computer vision and clinical NLP — each project links to its public GitHub repo.">
+<meta property="og:image" content="https://samarthmadhivanan.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Projects — Samarth Madhivanan">
+<meta name="twitter:description" content="Agentic AI, data tooling, computer vision and clinical NLP.">
+<meta name="twitter:image" content="https://samarthmadhivanan.com/og.png">
+<link rel="stylesheet" href="site.css">
+<style>
+.projects-head { background-color: var(--forest); background-image: linear-gradient(rgba(198,227,107,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(198,227,107,0.08) 1px, transparent 1px); background-size: 42px 42px; }
+.head-stats { display: flex; gap: 30px; flex-wrap: wrap; margin-top: 36px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(244,236,216,0.7); }
+.head-stats strong { display: block; font-family: 'Anton', sans-serif; font-size: 34px; letter-spacing: 1px; color: var(--lime); margin-bottom: 2px; }
+.filter-bar { background: var(--bone); border-bottom: 2px solid var(--ink); padding: 20px 40px; position: sticky; top: 72px; z-index: 100; }
+.filter-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filter-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(20,18,16,0.5); margin-right: 6px; }
+.board { background: var(--rose); padding: 78px 40px 92px; border-bottom: 2px solid var(--ink); }
+.board-wrap { max-width: 1240px; margin: 0 auto; }
+.pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px 26px; align-items: start; }
+.pcard { position: relative; display: block; text-decoration: none; color: inherit; background: var(--bone); border: 2px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); padding: 14px 14px 20px; transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease; }
+.pcard:nth-child(4n+1) { transform: rotate(-1.8deg); }
+.pcard:nth-child(4n+2) { transform: rotate(1.4deg); margin-top: 26px; }
+.pcard:nth-child(4n+3) { transform: rotate(-0.8deg); margin-top: 12px; }
+.pcard:nth-child(4n)   { transform: rotate(2deg); }
+.pcard:hover { transform: rotate(0deg) translateY(-7px); box-shadow: 13px 13px 0 var(--ink); color: inherit; }
+.pcard.is-hidden { display: none; }
+.pcard-photo { aspect-ratio: 5 / 4; width: 100%; position: relative; overflow: hidden; margin-bottom: 15px; border: 2px solid var(--ink); display: flex; align-items: flex-end; }
+.pcard:nth-child(5n+1) .pcard-photo { background: repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 6px, transparent 6px 12px), linear-gradient(160deg, #1e5a3a 0%, #c6e36b 190%); }
+.pcard:nth-child(5n+2) .pcard-photo { background: repeating-linear-gradient(-45deg, rgba(255,255,255,0.08) 0 6px, transparent 6px 12px), linear-gradient(160deg, #e25a2a 0%, #e8b53a 190%); }
+.pcard:nth-child(5n+3) .pcard-photo { background: repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 6px, transparent 6px 12px), linear-gradient(160deg, #2a4a85 0%, #e8b5c0 190%); }
+.pcard:nth-child(5n+4) .pcard-photo { background: repeating-linear-gradient(-45deg, rgba(255,255,255,0.08) 0 6px, transparent 6px 12px), linear-gradient(160deg, #173022 0%, #8aa05a 190%); }
+.pcard:nth-child(5n)   .pcard-photo { background: repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 6px, transparent 6px 12px), linear-gradient(160deg, #6a2a5a 0%, #e8b53a 190%); }
+.pcard-photo .stamp { font-family: 'Anton', sans-serif; font-size: clamp(30px, 4vw, 46px); line-height: 0.86; letter-spacing: 0.5px; text-transform: uppercase; color: rgba(244,236,216,0.9); padding: 14px; text-shadow: 2px 2px 0 rgba(20,18,16,0.55); }
+.pcard-photo .label { position: absolute; top: 10px; right: 10px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--bone); text-transform: uppercase; background: rgba(0,0,0,0.5); padding: 4px 7px; }
+.pcard-cat { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2.5px; color: var(--terra); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+.pcard-title { font-family: 'Anton', sans-serif; font-size: 26px; letter-spacing: 0.4px; line-height: 0.98; text-transform: uppercase; margin-bottom: 9px; }
+.pcard-desc { font-size: 14px; line-height: 1.5; color: rgba(20,18,16,0.72); margin-bottom: 13px; }
+.pcard-stack { display: flex; flex-wrap: wrap; gap: 5px; }
+.pcard-stack span { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; padding: 3px 7px; border: 1px solid var(--line-2); color: rgba(20,18,16,0.6); }
+.pcard-arrow { position: absolute; top: 18px; left: 18px; width: 32px; height: 32px; border-radius: 50%; background: var(--lime); border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center; font-weight: 700; box-shadow: 2px 2px 0 var(--ink); }
+.empty-note { display: none; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 1px; color: rgba(20,18,16,0.55); padding: 40px 0; }
+.empty-note.is-on { display: block; }
+.more { background: var(--cream-2); background-image: linear-gradient(rgba(20,18,16,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(20,18,16,0.07) 1px, transparent 1px); background-size: 34px 34px; }
+.more-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.more-list a { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1px; text-decoration: none; color: var(--ink); background: var(--bone); border: 2px solid var(--ink); padding: 8px 13px; box-shadow: 3px 3px 0 var(--ink); transition: transform 0.12s, box-shadow 0.12s, background 0.2s; }
+.more-list a:hover { background: var(--lime); color: var(--ink); transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.cta-band { background: var(--terra); padding: 26px; border-bottom: 2px solid var(--ink); }
+.cta-inner { background: var(--forest); border: 2px solid var(--ink); border-radius: 20px; padding: 68px 34px; text-align: center; background-image: linear-gradient(rgba(198,227,107,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(198,227,107,0.08) 1px, transparent 1px); background-size: 42px 42px; }
+.cta-inner h2 { font-family: 'Anton', sans-serif; font-size: clamp(38px, 5.4vw, 74px); line-height: 0.95; text-transform: uppercase; color: var(--lime); margin: 0 auto 28px; max-width: 20ch; }
+@media (max-width: 1024px) { .pgrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 720px) {
+  .filter-bar { padding: 14px 22px; top: 64px; }
+  .board { padding: 52px 22px 62px; }
+  .pgrid { grid-template-columns: 1fr; gap: 26px; }
+  .pcard { transform: none !important; margin-top: 0 !important; }
+  .pcard:hover { transform: translateY(-5px) !important; }
+  .cta-band { padding: 14px; }
+  .cta-inner { padding: 48px 22px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">SAMARTH<span class="dot">.</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Work</a></li>
+      <li><a href="projects.html" class="active">Projects</a></li>
+      <li><a href="blog.html">Blog</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="contact.html" class="nav-cta">Let's Talk <span>»</span></a>
+    <button class="nav-toggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<section class="page-head projects-head">
+  <div class="page-head-wrap">
+    <div class="eyebrow on-dark">The whole shelf</div>
+    <h1 class="page-title">Things<br>I've Built</h1>
+    <p class="page-lede">Agents that read the web, tools that clean data nobody wants to clean, models that watch the road. <strong>Have a look around</strong> — each one started as somebody's annoying afternoon.</p>
+    <div class="head-stats">
+      <div><strong>32</strong>Repositories</div>
+      <div><strong>13</strong>Shipped &amp; public</div>
+      <div><strong>5</strong>Problem domains</div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker-track">
+    <div class="ticker-group">
+      <span class="ticker-item">AGENTIC AI</span><span class="ticker-sep"></span>
+      <span class="ticker-item">DATA TOOLING</span><span class="ticker-sep"></span>
+      <span class="ticker-item">COMPUTER VISION</span><span class="ticker-sep"></span>
+      <span class="ticker-item">CLINICAL NLP</span><span class="ticker-sep"></span>
+      <span class="ticker-item">OPEN SOURCE</span><span class="ticker-sep"></span>
+      <span class="ticker-item">READ THE CODE</span><span class="ticker-sep"></span>
+    </div>
+    <div class="ticker-group">
+      <span class="ticker-item">AGENTIC AI</span><span class="ticker-sep"></span>
+      <span class="ticker-item">DATA TOOLING</span><span class="ticker-sep"></span>
+      <span class="ticker-item">COMPUTER VISION</span><span class="ticker-sep"></span>
+      <span class="ticker-item">CLINICAL NLP</span><span class="ticker-sep"></span>
+      <span class="ticker-item">OPEN SOURCE</span><span class="ticker-sep"></span>
+      <span class="ticker-item">READ THE CODE</span><span class="ticker-sep"></span>
+    </div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-inner">
+    <span class="filter-label">Filter</span>
+    <button type="button" class="chip is-on" data-filter="all">All work</button>
+    <button type="button" class="chip" data-filter="agents">Agents &amp; LLM</button>
+    <button type="button" class="chip" data-filter="data">Data tooling</button>
+    <button type="button" class="chip" data-filter="vision">Computer vision</button>
+    <button type="button" class="chip" data-filter="clinical">Clinical</button>
+    <button type="button" class="chip" data-filter="creative">Creative</button>
+  </div>
+</div>
+
+<section class="board">
+  <div class="board-wrap">
+    <div class="pgrid" id="pgrid">
+
+      <a class="pcard" data-tags="agents" href="https://github.com/samarthm04/agent-interface-layer" target="_blank" rel="noopener">
+        <div class="tape"></div>
+        <div class="pcard-photo"><span class="label">// MCP</span><div class="stamp">Agent<br>Layer</div></div>
+        <div class="pcard-cat">Open Source · Flagship</div>
+        <div class="pcard-title">Agent Interface Layer</div>
+        <p class="pcard-desc">Give an LLM a URL and a goal in plain language — it drives a real browser and answers, never seeing a line of HTML. Perception falls back accessibility tree → DOM → vision, and a safety layer hands off before it ever touches a password field.</p>
+        <div class="pcard-stack"><span>Python</span><span>Playwright</span><span>MCP</span><span>CDP</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="data" href="https://github.com/samarthm04/datawrangler" target="_blank" rel="noopener">
+        <div class="tape" style="background: rgba(226,90,42,0.75);"></div>
+        <div class="pcard-photo"><span class="label">// KPMG</span><div class="stamp">Data<br>Wrangler</div></div>
+        <div class="pcard-cat">KPMG Digital Lighthouse</div>
+        <div class="pcard-title">DataWrangler</div>
+        <p class="pcard-desc">An AI data-cleaning workbench for financial analysts. Eight transforms, automatic type detection, and an LLM that proposes a fix you approve before it runs. Raw cell values never leave the browser — only a schema summary goes to the model.</p>
+        <div class="pcard-stack"><span>JavaScript</span><span>FastAPI</span><span>Pandas</span><span>Claude</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="clinical agents" href="https://github.com/samarthm04/indycare-medai-mvp" target="_blank" rel="noopener">
+        <div class="tape" style="background: rgba(198,227,107,0.9);"></div>
+        <div class="pcard-photo"><span class="label">// ONCOLOGY</span><div class="stamp">Clinical<br>AI</div></div>
+        <div class="pcard-cat">IndyRX · Oncology</div>
+        <div class="pcard-title">IndyCare MedAI</div>
+        <p class="pcard-desc">Turns a consultation and a stack of medical reports into structured, guideline-driven clinical documentation — so oncologists spend their evening with patients instead of paperwork.</p>
+        <div class="pcard-stack"><span>Python</span><span>LLM</span><span>Clinical NLP</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="agents" href="https://github.com/samarthm04/finance_bot" target="_blank" rel="noopener">
+        <div class="tape"></div>
+        <div class="pcard-photo"><span class="label">// FINTECH</span><div class="stamp">Finance<br>Bot</div></div>
+        <div class="pcard-cat">Freelance · Shipped</div>
+        <div class="pcard-title">Financial Logging Bot</div>
+        <p class="pcard-desc">A Telegram bot that turns messy expense chatter and photographed cheques into structured transactions. The client stopped keeping a spreadsheet; their CA gets clean books automatically.</p>
+        <div class="pcard-stack"><span>Python</span><span>OCR</span><span>LLM</span><span>Telegram</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="creative agents" href="https://github.com/samarthm04/zais-dj" target="_blank" rel="noopener">
+        <div class="tape" style="background: rgba(226,90,42,0.75);"></div>
+        <div class="pcard-photo"><span class="label">// AUDIO</span><div class="stamp">Zais<br>DJ</div></div>
+        <div class="pcard-cat">Side Project</div>
+        <div class="pcard-title">Zais DJ Engine</div>
+        <p class="pcard-desc">An AI DJ that hears structure: beat, key and cycle analysis, automatic cue-point detection, then renders a continuous beatmatched set. No crossfade guesswork.</p>
+        <div class="pcard-stack"><span>Python</span><span>DSP</span><span>Audio ML</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="agents" href="https://github.com/samarthm04/openenv-support-triage" target="_blank" rel="noopener">
+        <div class="tape" style="background: rgba(198,227,107,0.9);"></div>
+        <div class="pcard-photo"><span class="label">// RL ENV</span><div class="stamp">Support<br>Triage</div></div>
+        <div class="pcard-cat">OpenEnv Hackathon</div>
+        <div class="pcard-title">Support Triage RL</div>
+        <p class="pcard-desc">A real-world RL environment that grades whether an agent can actually run a support inbox — escalate the outage, answer the routine ticket, spot the spam — across progressive difficulty tiers.</p>
+        <div class="pcard-stack"><span>Python</span><span>RL</span><span>OpenEnv</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="vision" href="https://github.com/samarthm04/Vehicle_Cut-In_Detection" target="_blank" rel="noopener">
+        <div class="tape"></div>
+        <div class="pcard-photo"><span class="label">// INTEL</span><div class="stamp">Cut-In<br>Detect</div></div>
+        <div class="pcard-cat">Intel · Research</div>
+        <div class="pcard-title">Vehicle Cut-In Detection</div>
+        <p class="pcard-desc">YOLOv8 tracking that works out where the road actually is — inferring road, sky and mid lines so it adapts to any camera angle — then computes time-to-collision and warns on cut-ins.</p>
+        <div class="pcard-stack"><span>Python</span><span>YOLOv8</span><span>OpenCV</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="agents data" href="https://github.com/samarthm04/audit-poc-final" target="_blank" rel="noopener">
+        <div class="tape" style="background: rgba(226,90,42,0.75);"></div>
+        <div class="pcard-photo"><span class="label">// AUDIT</span><div class="stamp">Work<br>paper</div></div>
+        <div class="pcard-cat">KPMG · Proof of concept</div>
+        <div class="pcard-title">Audit Workpaper Assistant</div>
+        <p class="pcard-desc">Reads audit workpapers the way a reviewer does and surfaces what needs a human — an intelligence layer over documentation that used to be checked line by line.</p>
+        <div class="pcard-stack"><span>Python</span><span>LLM</span><span>Document AI</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="data" href="https://github.com/samarthm04/capital-statement_kpmg" target="_blank" rel="noopener">
+        <div class="tape" style="background: rgba(198,227,107,0.9);"></div>
+        <div class="pcard-photo"><span class="label">// FINANCE</span><div class="stamp">Capital<br>Stmt</div></div>
+        <div class="pcard-cat">KPMG · Internal tooling</div>
+        <div class="pcard-title">Capital Statement</div>
+        <p class="pcard-desc">Statement preparation that stops being a manual assembly job — structured extraction and generation for a workflow that ran on copy-paste.</p>
+        <div class="pcard-stack"><span>Python</span><span>Automation</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="vision" href="https://github.com/samarthm04/advanced-lane-detection-for-self-driving-cars" target="_blank" rel="noopener">
+        <div class="tape"></div>
+        <div class="pcard-photo"><span class="label">// CV</span><div class="stamp">Lane<br>Detect</div></div>
+        <div class="pcard-cat">Computer vision</div>
+        <div class="pcard-title">Advanced Lane Detection</div>
+        <p class="pcard-desc">Classical computer vision done properly — perspective transform, colour and gradient thresholding, curvature fitting — for lane finding on real driving footage.</p>
+        <div class="pcard-stack"><span>Python</span><span>OpenCV</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="vision" href="https://github.com/samarthm04/ComputerVision_0_to_Hero" target="_blank" rel="noopener">
+        <div class="tape" style="background: rgba(226,90,42,0.75);"></div>
+        <div class="pcard-photo"><span class="label">// TEACHING</span><div class="stamp">CV 0<br>to Hero</div></div>
+        <div class="pcard-cat">Open Source · Guide</div>
+        <div class="pcard-title">CV Zero to Hero</div>
+        <p class="pcard-desc">The path I wish existed when I started: a step-by-step route from knowing no machine learning to being genuinely useful at computer vision.</p>
+        <div class="pcard-stack"><span>Notebooks</span><span>Teaching</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="data" href="https://github.com/samarthm04/home-scouter" target="_blank" rel="noopener">
+        <div class="tape" style="background: rgba(198,227,107,0.9);"></div>
+        <div class="pcard-photo"><span class="label">// PROPERTY</span><div class="stamp">Home<br>Scouter</div></div>
+        <div class="pcard-cat">Product experiment</div>
+        <div class="pcard-title">Home Scouter</div>
+        <p class="pcard-desc">House hunting as a data problem — gathering and structuring listings so the shortlist comes out of evidence instead of endless tabs.</p>
+        <div class="pcard-stack"><span>Web</span><span>Data</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+      <a class="pcard" data-tags="creative" href="https://github.com/samarthm04/knackify" target="_blank" rel="noopener">
+        <div class="tape"></div>
+        <div class="pcard-photo"><span class="label">// PRODUCT</span><div class="stamp">Knack<br>ify</div></div>
+        <div class="pcard-cat">Product · In progress</div>
+        <div class="pcard-title">Knackify</div>
+        <p class="pcard-desc">An early-stage product build. Repo's public, story's still being written.</p>
+        <div class="pcard-stack"><span>Web</span></div>
+        <div class="pcard-arrow">↗</div>
+      </a>
+
+    </div>
+    <p class="empty-note" id="emptyNote">// Nothing under that filter yet — try another.</p>
+  </div>
+</section>
+
+<section class="section more">
+  <div class="section-wrap">
+    <div class="eyebrow">Also on the shelf</div>
+    <h2 class="section-heading">Smaller <span class="hi-lime">Experiments</span></h2>
+    <p style="max-width: 56ch; margin-bottom: 22px; color: rgba(20,18,16,0.72);">Hackathon builds, coursework that outgrew its brief, and things I made to answer a question. Not everything needs a case study.</p>
+    <div class="more-list">
+      <a href="https://github.com/samarthm04/real-estate-property-portal" target="_blank" rel="noopener">real-estate-property-portal ↗</a>
+      <a href="https://github.com/samarthm04/scalerhackk" target="_blank" rel="noopener">scalerhackk ↗</a>
+      <a href="https://github.com/samarthm04/movie_booking-2" target="_blank" rel="noopener">movie_booking ↗</a>
+      <a href="https://github.com/samarthm04/naisha_portfolio" target="_blank" rel="noopener">naisha_portfolio ↗</a>
+      <a href="https://github.com/samarthm04?tab=repositories" target="_blank" rel="noopener">All 32 repositories ↗</a>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="cta-inner">
+    <h2>Got something that should be running without you?</h2>
+    <a href="contact.html" class="btn">Start a conversation <span>»</span></a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">SAMARTH MADHIVANAN<span class="dot">.</span></div>
+      <p class="footer-tagline">AI/ML Analyst at KPMG — Digital Lighthouse, Mumbai. AI systems and workflow automation for businesses and individuals.</p>
+    </div>
+    <div>
+      <div class="footer-col-head">Work</div>
+      <ul class="footer-links">
+        <li><a href="projects.html">Agentic AI</a></li>
+        <li><a href="projects.html">Workflow Automation</a></li>
+        <li><a href="projects.html">Data Tools</a></li>
+        <li><a href="contact.html">Consulting</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-head">Site</div>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-head">Connect</div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/samarthm04" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/samarth-madhivanan" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="contact.html">Email</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>Built by Samarth Madhivanan. All rights reserved.</span>
+    <span>© 2026 · Mumbai</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const chips = document.querySelectorAll('.chip[data-filter]');
+  const cards = document.querySelectorAll('#pgrid .pcard');
+  const empty = document.getElementById('emptyNote');
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      chips.forEach(function (c) { c.classList.remove('is-on'); });
+      chip.classList.add('is-on');
+      const f = chip.dataset.filter;
+      let shown = 0;
+      cards.forEach(function (card) {
+        const on = f === 'all' || (card.dataset.tags || '').split(' ').indexOf(f) > -1;
+        card.classList.toggle('is-hidden', !on);
+        if (on) shown++;
+      });
+      empty.classList.toggle('is-on', shown === 0);
+    });
+  });
+})();
+</script>
+<script src="nav.js"></script>
+
+</body>
+</html>
