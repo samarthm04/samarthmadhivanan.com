@@ -120,18 +120,6 @@
   </nav>
 </header>
 
-<div class="admin-bar" id="adminBar">
-  <div class="admin-inner">
-    <span class="admin-tag">// Admin mode</span>
-    <button class="btn btn-sm" id="newPostBtn">+ New post</button>
-    <button class="btn btn-sm" id="exportBtn">Export JSON</button>
-    <button class="btn btn-sm" id="importBtn">Import JSON</button>
-    <button class="btn btn-sm" id="lockBtn">Lock</button>
-    <input type="file" id="importFile" accept=".json" style="display:none">
-    <span class="admin-note">Saved in this browser only</span>
-  </div>
-</div>
-
 <section class="page-head blog-head" id="blogHead">
   <div class="page-head-wrap">
     <div class="eyebrow">Notes from the build</div>
@@ -165,61 +153,6 @@
     <div class="article-body" id="articleBody"></div>
   </div>
 </article>
-
-<section class="editor" id="editorView">
-  <div class="editor-wrap">
-    <h2 id="editorTitle">New post</h2>
-    <div class="field">
-      <label for="fTitle">Title</label>
-      <input type="text" id="fTitle" placeholder="What did you learn?">
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label for="fDate">Date</label>
-        <input type="date" id="fDate">
-      </div>
-      <div class="field">
-        <label for="fStatus">Status</label>
-        <select id="fStatus">
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-        </select>
-      </div>
-    </div>
-    <div class="field">
-      <label for="fTags">Tags</label>
-      <input type="text" id="fTags" placeholder="agents, evaluation, tokens">
-      <div class="hint">Comma separated.</div>
-    </div>
-    <div class="field">
-      <label for="fExcerpt">Excerpt</label>
-      <input type="text" id="fExcerpt" placeholder="One line that makes someone click.">
-    </div>
-    <div class="field">
-      <label for="fBody">Body</label>
-      <textarea id="fBody" placeholder="Write here.&#10;&#10;## A heading&#10;&#10;Normal paragraph with **highlighted** text and `code`.&#10;&#10;- a list item&#10;- another&#10;&#10;&gt; a pull quote"></textarea>
-      <div class="hint">Blank line between paragraphs. <code>##</code> heading, <code>###</code> subheading, <code>-</code> list, <code>&gt;</code> quote, <code>**bold**</code>, <code>`code`</code>.</div>
-    </div>
-    <div class="editor-actions">
-      <button class="btn btn-forest" id="saveBtn">Save post</button>
-      <button class="btn" id="cancelBtn">Cancel</button>
-      <button class="btn" id="deleteBtn" style="display:none;">Delete</button>
-    </div>
-  </div>
-</section>
-
-<section class="gate" id="gateView">
-  <div class="gate-wrap">
-    <h2 id="gateTitle">Admin</h2>
-    <p id="gateCopy">Enter your passphrase to manage posts.</p>
-    <input type="password" id="gatePass" placeholder="Passphrase">
-    <div class="gate-err" id="gateErr"></div>
-    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-      <button class="btn btn-forest" id="gateGo">Unlock</button>
-      <button class="btn" id="gateCancel">Cancel</button>
-    </div>
-  </div>
-</section>
 
 <footer class="footer">
   <div class="footer-grid">
@@ -256,7 +189,6 @@
   </div>
   <div class="footer-bottom">
     <span>Built by Samarth Madhivanan. All rights reserved.</span>
-    <button class="footer-admin" id="adminToggle">Admin</button>
     <span>© 2026 · Mumbai</span>
   </div>
 </footer>
