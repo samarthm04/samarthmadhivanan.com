@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#1f3a2a">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="favicon.svg">
+<link rel="stylesheet" href="assistant.css">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://samarthmadhivanan.com/contact.html">
 <meta property="og:title" content="Contact — Samarth Madhivanan">
@@ -121,9 +122,9 @@
 
     <div class="form-card">
       <h2>Start here</h2>
-      <p class="sub">Fill this in and it opens a pre-written email from your own mail app — nothing gets stored on this site.</p>
+      <p class="sub">Fill this in and it lands straight in Samarth's inbox. He usually replies within 24 hours.</p>
 
-      <div class="sent" id="sentNote">Your mail app should have opened with everything filled in. If it didn't, email <strong>samarthm04edu@gmail.com</strong> directly.</div>
+      <div class="sent" id="sentNote">Got it — that's with Samarth. He'll come back to you, usually within 24 hours. If you'd rather email directly: <strong>samarthm04edu@gmail.com</strong></div>
 
       <div class="field">
         <label for="cName">Your name</label>
@@ -260,7 +261,21 @@
     });
   });
 
-  document.getElementById('cSend').addEventListener('click', function () {
+  const btn = document.getElementById('cSend');
+
+  function mailtoFallback(name, email, org, msg) {
+    const body =
+      'Name: ' + name + '\n' +
+      'Email: ' + email + '\n' +
+      (org ? 'Company: ' + org + '\n' : '') +
+      'Interested in: ' + kind + '\n\n' +
+      'The manual process:\n' + msg + '\n';
+    window.location.href = 'mailto:samarthm04edu@gmail.com' +
+      '?subject=' + encodeURIComponent(kind + ' — enquiry from ' + name) +
+      '&body=' + encodeURIComponent(body);
+  }
+
+  btn.addEventListener('click', async function () {
     const name = document.getElementById('cName').value.trim();
     const email = document.getElementById('cEmail').value.trim();
     const org = document.getElementById('cOrg').value.trim();
@@ -272,23 +287,40 @@
     if (!msg) { err.textContent = 'Tell me about the process — even two lines.'; document.getElementById('cMsg').focus(); return; }
     err.textContent = '';
 
-    const body =
-      'Name: ' + name + '\n' +
-      'Email: ' + email + '\n' +
-      (org ? 'Company: ' + org + '\n' : '') +
-      'Interested in: ' + kind + '\n\n' +
-      'The manual process:\n' + msg + '\n';
+    const note = 'Interested in: ' + kind + (org ? '\nCompany: ' + org : '') + '\n\n' + msg;
+    btn.disabled = true;
+    const label = btn.innerHTML;
+    btn.textContent = 'Sending…';
 
-    const href = 'mailto:samarthm04edu@gmail.com' +
-      '?subject=' + encodeURIComponent(kind + ' — enquiry from ' + name) +
-      '&body=' + encodeURIComponent(body);
+    let ok = false;
+    try {
+      const res = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, note: note })
+      });
+      ok = res.ok;
+      if (!ok) {
+        const data = await res.json().catch(function () { return {}; });
+        if (data.error) err.textContent = data.error;
+      }
+    } catch (e) { ok = false; }
 
-    document.getElementById('sentNote').classList.add('is-on');
-    window.location.href = href;
+    btn.disabled = false;
+    btn.innerHTML = label;
+
+    if (ok) {
+      document.getElementById('sentNote').classList.add('is-on');
+      document.getElementById('cMsg').value = '';
+      return;
+    }
+    /* Server unreachable — fall back to the visitor's own mail app. */
+    mailtoFallback(name, email, org, msg);
   });
 })();
 </script>
 <script src="nav.js"></script>
 
+<script src="assistant.js" defer></script>
 </body>
 </html>

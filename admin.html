@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistant Console — Samarth Madhivanan</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="site.css">
+<style>
+.wrap { max-width: 1240px; margin: 0 auto; padding: 26px 22px 60px; }
+.gate { max-width: 400px; margin: 80px auto; background: var(--bone); border: 2px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); padding: 30px; text-align: center; }
+.gate h1 { font-family: 'Anton', sans-serif; font-size: 30px; text-transform: uppercase; margin-bottom: 6px; }
+.gate p { font-size: 14px; color: rgba(20,18,16,0.65); margin-bottom: 18px; }
+.gate input { width: 100%; font-size: 16px; font-family: 'Inter', sans-serif; background: var(--cream-2); border: 2px solid var(--ink); padding: 11px 13px; margin-bottom: 12px; }
+.gate .err { color: var(--terra); font-size: 13px; font-weight: 600; min-height: 18px; margin-bottom: 8px; }
+
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.top h1 { font-family: 'Anton', sans-serif; font-size: clamp(30px,5vw,52px); text-transform: uppercase; line-height: 0.95; }
+.top .meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; color: rgba(20,18,16,0.55); }
+
+.cols { display: grid; grid-template-columns: 330px 1fr; gap: 20px; align-items: start; }
+.list { border: 2px solid var(--ink); background: var(--bone); box-shadow: 5px 5px 0 var(--ink); max-height: 74vh; overflow-y: auto; }
+.conv { border-bottom: 2px solid var(--ink); padding: 13px 14px; cursor: pointer; transition: background 0.15s; }
+.conv:last-child { border-bottom: 0; }
+.conv:hover { background: var(--cream-2); }
+.conv.on { background: var(--lime); }
+.conv-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.conv-name { font-family: 'Archivo Black', sans-serif; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px; }
+.conv-time { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 1px; color: rgba(20,18,16,0.5); white-space: nowrap; }
+.conv-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.8px; color: rgba(20,18,16,0.62); margin-top: 5px; word-break: break-all; }
+.flag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 1.2px; text-transform: uppercase; border: 1px solid var(--ink); padding: 2px 5px; margin-top: 6px; margin-right: 4px; }
+.flag.lead { background: var(--mustard); }
+.flag.live { background: var(--terra); color: var(--bone); }
+
+.thread { border: 2px solid var(--ink); background: var(--bone); box-shadow: 5px 5px 0 var(--ink); display: flex; flex-direction: column; min-height: 74vh; max-height: 74vh; }
+.thread-head { border-bottom: 2px solid var(--ink); padding: 13px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--cream-2); }
+.thread-head .who { font-family: 'Archivo Black', sans-serif; font-size: 14px; text-transform: uppercase; flex: 1; min-width: 140px; }
+.thread-log { flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 11px; }
+.m { max-width: 76%; font-size: 14px; line-height: 1.5; padding: 10px 12px; border: 2px solid var(--ink); white-space: pre-wrap; word-wrap: break-word; }
+.m.visitor  { align-self: flex-end; background: var(--lime); }
+.m.assistant{ align-self: flex-start; background: var(--cream-2); }
+.m.samarth  { align-self: flex-start; background: var(--terra); color: var(--bone); }
+.m.system   { align-self: center; max-width: 92%; background: none; border: 2px dashed var(--line-2); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.6px; color: rgba(20,18,16,0.6); }
+.m .lbl { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; opacity: 0.75; margin-bottom: 5px; }
+.reply-row { border-top: 2px solid var(--ink); padding: 12px; display: flex; gap: 9px; background: var(--cream-2); }
+.reply-row input { flex: 1; min-width: 0; font-family: 'Inter', sans-serif; font-size: 14px; background: var(--bone); border: 2px solid var(--ink); padding: 10px 12px; }
+.empty { padding: 60px 20px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1px; color: rgba(20,18,16,0.5); }
+.hidden { display: none !important; }
+@media (max-width: 900px) { .cols { grid-template-columns: 1fr; } .list { max-height: 300px; } .thread { min-height: 60vh; } }
+</style>
+</head>
+<body>
+
+<section class="gate" id="gate">
+  <h1>Console</h1>
+  <p>Samarth's Assistant — live conversations.</p>
+  <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
+  <div class="err" id="gateErr"></div>
+  <button class="btn btn-forest" id="go" type="button">Unlock</button>
+</section>
+
+<div class="wrap hidden" id="app">
+  <div class="top">
+    <h1>Assistant <span class="hi-lime">Console</span></h1>
+    <div class="meta" id="stat">—</div>
+  </div>
+  <div class="cols">
+    <div class="list" id="list"><div class="empty">Loading…</div></div>
+    <div class="thread">
+      <div class="thread-head">
+        <span class="who" id="who">Pick a conversation</span>
+        <button class="btn btn-sm" id="joinBtn" type="button" disabled>Join as Samarth</button>
+      </div>
+      <div class="thread-log" id="tlog"><div class="empty">Nothing selected.</div></div>
+      <div class="reply-row">
+        <input type="text" id="reply" placeholder="Reply as Samarth…" maxlength="2000" disabled>
+        <button class="btn btn-sm btn-forest" id="sendBtn" type="button" disabled>Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var TOKEN_KEY = 'sa_admin_token';
+  var token = null;
+  try { token = sessionStorage.getItem(TOKEN_KEY); } catch (e) {}
+
+  var current = null, lastId = 0, handover = false, timer = null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function api(action, opts) {
+    opts = opts || {};
+    var url = '/api/admin?action=' + action + (opts.qs || '');
+    return fetch(url, {
+      method: opts.body ? 'POST' : 'GET',
+      headers: Object.assign({ 'x-admin-token': token }, opts.body ? { 'Content-Type': 'application/json' } : {}),
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    }).then(function (r) {
+      if (r.status === 401) { logout(); throw new Error('unauthorised'); }
+      return r.json();
+    });
+  }
+
+  function logout() {
+    token = null;
+    try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    $('app').classList.add('hidden');
+    $('gate').classList.remove('hidden');
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+
+  function unlock() {
+    var pw = $('pw').value;
+    if (!pw) { $('gateErr').textContent = 'Enter the password.'; return; }
+    $('gateErr').textContent = '';
+    fetch('/api/admin?action=login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok) { $('gateErr').textContent = res.d.error || 'Nope.'; return; }
+        token = res.d.token;
+        try { sessionStorage.setItem(TOKEN_KEY, token); } catch (e) {}
+        start();
+      })
+      .catch(function () { $('gateErr').textContent = 'Could not reach the server.'; });
+  }
+
+  function fmt(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return '';
+    var now = new Date();
+    var sameDay = d.toDateString() === now.toDateString();
+    return sameDay
+      ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+      : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+
+  function loadList() {
+    return api('conversations').then(function (data) {
+      var list = $('list');
+      var convs = data.conversations || [];
+      $('stat').textContent = convs.length + ' conversations';
+      if (!convs.length) { list.innerHTML = '<div class="empty">No conversations yet.</div>'; return; }
+      list.innerHTML = '';
+      convs.forEach(function (c) {
+        var el = document.createElement('div');
+        el.className = 'conv' + (c.id === current ? ' on' : '');
+        var name = c.visitor_name || 'Visitor';
+        var contact = [c.visitor_email, c.visitor_phone ? (c.country_code || '') + ' ' + c.visitor_phone : '']
+          .filter(Boolean).join(' · ');
+        el.innerHTML =
+          '<div class="conv-top"><span class="conv-name"></span><span class="conv-time"></span></div>' +
+          '<div class="conv-sub"></div>' +
+          (c.status === 'lead' ? '<span class="flag lead">Lead</span>' : '') +
+          (c.admin_joined ? '<span class="flag live">You joined</span>' : '');
+        el.querySelector('.conv-name').textContent = name;
+        el.querySelector('.conv-time').textContent = fmt(c.last_message_at);
+        el.querySelector('.conv-sub').textContent = contact || (c.message_count + ' messages');
+        el.addEventListener('click', function () { select(c.id, name); });
+        list.appendChild(el);
+      });
+    });
+  }
+
+  function select(id, name) {
+    current = id; lastId = 0;
+    location.hash = 'c/' + id;
+    $('who').textContent = name || 'Conversation';
+    $('tlog').innerHTML = '';
+    $('reply').disabled = false;
+    $('sendBtn').disabled = false;
+    $('joinBtn').disabled = false;
+    loadThread();
+    loadList();
+  }
+
+  function render(m) {
+    var el = document.createElement('div');
+    el.className = 'm ' + m.role;
+    if (m.role !== 'system') {
+      var l = document.createElement('div');
+      l.className = 'lbl';
+      l.textContent = m.role === 'visitor' ? 'Visitor' : m.role === 'samarth' ? 'You' : 'Assistant';
+      el.appendChild(l);
+    }
+    var b = document.createElement('div');
+    b.textContent = m.content;
+    el.appendChild(b);
+    $('tlog').appendChild(el);
+    $('tlog').scrollTop = $('tlog').scrollHeight;
+  }
+
+  function loadThread() {
+    if (!current) return Promise.resolve();
+    return api('messages', { qs: '&conversationId=' + encodeURIComponent(current) + '&since=' + lastId })
+      .then(function (data) {
+        (data.messages || []).forEach(function (m) {
+          if (m.id <= lastId) return;
+          lastId = m.id;
+          render(m);
+        });
+        handover = !!data.handover;
+        $('joinBtn').textContent = handover ? 'Leave chat' : 'Join as Samarth';
+      });
+  }
+
+  $('joinBtn').addEventListener('click', function () {
+    if (!current) return;
+    api('takeover', { body: { conversationId: current, on: !handover } })
+      .then(function () { return loadThread(); })
+      .then(loadList);
+  });
+
+  function sendReply() {
+    var text = $('reply').value.trim();
+    if (!text || !current) return;
+    $('reply').value = '';
+    api('reply', { body: { conversationId: current, text: text } })
+      .then(function () { return loadThread(); })
+      .then(loadList);
+  }
+  $('sendBtn').addEventListener('click', sendReply);
+  $('reply').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); sendReply(); }
+  });
+
+  function start() {
+    $('gate').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    loadList().then(function () {
+      var m = location.hash.match(/^#c\/([0-9a-f-]{36})$/i);
+      if (m) select(m[1]);
+    }).catch(function () {});
+    if (timer) clearInterval(timer);
+    timer = setInterval(function () {
+      if (document.hidden) return;
+      loadThread().catch(function () {});
+      loadList().catch(function () {});
+    }, 5000);
+  }
+
+  $('go').addEventListener('click', unlock);
+  $('pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') unlock(); });
+  if (token) start();
+})();
+</script>
+</body>
+</html>
