@@ -30,11 +30,12 @@ Any static host. Vercel/Netlify: point at this repo, no build command, output di
 
 ## Before going live — open items
 
-1. **Domain + email** — every page assumes `https://samarthmadhivanan.com` and `hello@samarthmadhivanan.com`. Register the domain, set up the mailbox, or find-and-replace both strings.
+1. **Domain** — register `samarthmadhivanan.com` and point it at Vercel.
 2. **`og.png`** — referenced by every page's Open Graph tags but not yet generated. Open `og-template.html`, screenshot the frame at exactly 1200×630, save as `og.png` in the root.
-3. **LinkedIn URL** — links point to `https://www.linkedin.com/in/samarth-madhivanan`; confirm that's the real handle.
-4. **Blog** — `blog.js` stores posts in the browser only, so visitors see an empty feed. Either bake posts into static HTML, move to a real CMS/build, or remove Blog from the nav until it's ready.
-5. **Real images** — project cards, the "ticket" photo and testimonial photos are CSS placeholders. Add a headshot and one image per project.
-6. **Client claims** — verify the KPMG / NPCI / Intel / IndyRX names and the "700M daily transactions" line, and confirm you're permitted to display those names/logos.
-7. **Testimonials** — the hidden block on `index.html` has placeholder quotes; replace with real attributed ones or delete.
-8. Submit `sitemap.xml` in Google Search Console; add analytics if wanted.
+3. **Blog CMS** — `blog.js` currently stores posts in the visitor's browser only. Replace with a real CMS (decision pending).
+4. **Real images** — project cards, the "ticket" photo and testimonial photos are CSS placeholders. Add a headshot and one image per project.
+5. **Client claims** — verify the KPMG / NPCI / Intel / IndyRX names and the "700M daily transactions" line, and confirm you're permitted to display those names/logos.
+6. **Testimonials** — the hidden block on `index.html` has placeholder quotes; replace with real attributed ones or delete.
+7. Submit `sitemap.xml` in Google Search Console; add analytics if wanted.
+
+Contact email is `samarthm04edu@gmail.com`; LinkedIn is `/in/samarth-madhivanan2306`.
