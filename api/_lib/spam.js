@@ -59,6 +59,20 @@ const PHONE_DIGITS = {
   '+41': [9], '+46': [9], '+34': [9], '+39': [9, 10], '+7': [10],
 };
 
+/* Abuse detection over arbitrary text. Used for lead fields and, before any
+   model call, for incoming chat messages. */
+export function detectAbuse(text) {
+  const flat = collapsed(text);
+  const wordText = spaced(text);
+  const slur = anywhere(flat, SLURS_LONG) || wholeWord(wordText, SLURS_EXACT, false);
+  const abusive =
+    slur ||
+    anywhere(flat, ABUSE_LONG) ||
+    wholeWord(wordText, ABUSE_STEMS, true) ||
+    wholeWord(wordText, ABUSE_EXACT, false);
+  return { abusive, slur };
+}
+
 export function phoneLooksReal(phone, countryCode) {
   const digits = String(phone || '').replace(/\D/g, '');
   if (digits.length < 6 || digits.length > 15) return false;
@@ -89,16 +103,9 @@ export function scoreLead({ name, email, phone, countryCode, note, recentCount }
 
   /* Check every field a person can type into, not just the message — the name
      and the email local part are just as likely to carry the abuse. */
-  const raw = [name, (email || '').split('@')[0], message].join(' ');
-  const flat = collapsed(raw);
-  const wordText = spaced(raw);
-
-  const slur = anywhere(flat, SLURS_LONG) || wholeWord(wordText, SLURS_EXACT, false);
-  const abusive =
-    slur ||
-    anywhere(flat, ABUSE_LONG) ||
-    wholeWord(wordText, ABUSE_STEMS, true) ||
-    wholeWord(wordText, ABUSE_EXACT, false);
+  const { abusive, slur } = detectAbuse(
+    [name, (email || '').split('@')[0], message].join(' ')
+  );
 
   if (slur) { score += 6; reasons.push('slur'); }
   else if (abusive) { score += 4; reasons.push('abusive language'); }

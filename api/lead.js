@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     const heuristic = scoreLead({ name, email, phone, countryCode, note, recentCount });
 
     if (heuristic.abusive && conversationId) {
-      await closeConversation(conversationId);
+      await closeConversation(conversationId, 'abuse');
       await addMessage(conversationId, 'system', 'Conversation closed — abusive submission.');
       console.warn(`conversation ${conversationId} closed: abusive lead`);
     }
@@ -128,8 +128,10 @@ export default async function handler(req, res) {
       /* Say so rather than pretending it was delivered. Telling someone their
          message went through when it didn't is a small lie, and if the filter
          has misjudged a real person this is what lets them route around it. */
+      /* Note the asymmetry: the polite decline hands over the direct email so a
+         misjudged enquiry has a route through. The abusive one does not. */
       const declined = heuristic.abusive
-        ? "I'm not going to pass that on to Samarth. I'll close this chat here."
+        ? "That's not acceptable. I'm not passing it on, and I'm closing this conversation."
         : `I don't think this is something I should pass on to Samarth. If I've got that wrong, email him directly at ${OWNER_EMAIL}.`;
 
       return json(res, 200, {

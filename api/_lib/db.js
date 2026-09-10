@@ -26,7 +26,7 @@ export async function createConversation({ ipHash, userAgent }) {
 export async function getConversation(id) {
   const { data, error } = await db()
     .from('conversations')
-    .select('id, admin_joined, message_count, status')
+    .select('id, admin_joined, message_count, status, closed_reason')
     .eq('id', id)
     .maybeSingle();
   if (error) throw error;
@@ -76,10 +76,10 @@ export async function recentActivity(ipHash, minutes) {
   };
 }
 
-export async function closeConversation(conversationId) {
+export async function closeConversation(conversationId, reason = 'other') {
   const { error } = await db()
     .from('conversations')
-    .update({ status: 'closed' })
+    .update({ status: 'closed', closed_reason: reason })
     .eq('id', conversationId);
   if (error) throw error;
 }

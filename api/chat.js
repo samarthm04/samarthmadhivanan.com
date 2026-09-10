@@ -8,6 +8,7 @@ import {
   json, sanitise, hashIp, isUuid,
   MAX_MESSAGE_LEN, MAX_MESSAGES_PER_CONVERSATION, MAX_HISTORY_TURNS,
 } from './_lib/guard.js';
+import { detectAbuse } from './_lib/spam.js';
 
 const MODEL = 'claude-haiku-4-5';
 
@@ -21,6 +22,11 @@ const FALLBACK_REPLY =
   "I'm having trouble thinking straight just now. Let me take your details and Samarth will come back to you.";
 const CLOSED_REPLY =
   "This chat's closed. If you'd like to reach Samarth, email samarthm04edu@gmail.com.";
+/* Closed for abuse: no sign-off, and deliberately no email address. Someone who
+   behaves like that doesn't get handed a direct line to Samarth. */
+const CLOSED_ABUSE_REPLY = 'This conversation is closed.';
+const ABUSE_REPLY =
+  "That's not acceptable, and I won't engage with it. This conversation is over.";
 const THROTTLED_REPLY =
   "That's a lot of messages in a short space of time. Give it a bit and come back, or email samarthm04edu@gmail.com.";
 
@@ -57,7 +63,8 @@ export default async function handler(req, res) {
 
     /* Already ended — don't spend anything on it. */
     if (conversation && conversation.status === 'closed') {
-      return json(res, 200, { conversationId, reply: CLOSED_REPLY, closed: true });
+      const reply = conversation.closed_reason === 'abuse' ? CLOSED_ABUSE_REPLY : CLOSED_REPLY;
+      return json(res, 200, { conversationId, reply, closed: true });
     }
 
     const activity = await recentActivity(ipHash, WINDOW_MINUTES);
@@ -86,6 +93,16 @@ export default async function handler(req, res) {
 
     const visitorRow = await addMessage(conversationId, 'visitor', message);
     await bumpConversation(conversationId, 1);
+
+    /* Abuse is settled before the model sees it: no tokens spent, no chance of a
+       softly-worded reply, and the same answer every time. */
+    if (detectAbuse(message).abusive) {
+      await addMessage(conversationId, 'assistant', ABUSE_REPLY);
+      await closeConversation(conversationId, 'abuse');
+      await addMessage(conversationId, 'system', 'Closed — abusive message.');
+      console.warn(`conversation ${conversationId} closed: abusive message`);
+      return json(res, 200, { conversationId, reply: ABUSE_REPLY, closed: true });
+    }
 
     /* Samarth is in the chat — the assistant stays quiet and the visitor
        polls /api/messages for his reply. */

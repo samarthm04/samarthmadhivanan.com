@@ -120,11 +120,23 @@ than flagged, so a real person with a typo gets told.
 Rate-limit checks run **before** the model call, so hitting one costs a database query,
 not tokens. Counters come from the `recent_activity` Postgres function.
 
-The assistant can also end a conversation itself — abuse, trolling, repeated off-topic
-pushing, or trying to use it as a general-purpose AI. It writes one civil closing line
-and emits `[[END_CHAT]]`; the server sets `conversations.status = 'closed'` and refuses
-further messages on it without calling the model. The prompt explicitly forbids ending a
-chat over poor English, bluntness or confusion.
+Conversations end in one of two ways, and the difference matters:
+
+**Abuse** is settled in `api/chat.js` *before* the model is called — the blocklist runs on
+the incoming message, and a hit gets a fixed reply:
+
+> That's not acceptable, and I won't engage with it. This conversation is over.
+
+No tokens spent, no chance of the model wording it softly, same answer every time.
+`closed_reason` is set to `abuse`, and any further message gets a bare
+*"This conversation is closed."* — **deliberately without the email address**. Someone who
+behaves like that doesn't get handed a direct line.
+
+**Everything else** — trolling, repeated off-topic pushing, trying to use it as a
+general-purpose AI — is the model's judgement. It writes one clear closing line and emits
+`[[END_CHAT]]`. Those closures *may* include the email, since the parting is civil. The
+prompt forbids ending a chat over poor English, bluntness or confusion, and forbids giving
+out the email to anyone who has been rude.
 
 Abuse submitted through the **note form** closes the conversation too — that text never
 reaches the chat model, so it needs catching separately. The blocklist runs over the name,
