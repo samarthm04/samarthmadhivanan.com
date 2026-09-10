@@ -63,6 +63,20 @@ export async function getMessages(conversationId, sinceId = 0, limit = 100) {
   return data || [];
 }
 
+/* How many leads this visitor has sent recently — the rate limit and one of the
+   spam signals both use it. */
+export async function recentLeadCount(ipHash, minutes) {
+  if (!ipHash) return 0;
+  const since = new Date(Date.now() - minutes * 60000).toISOString();
+  const { count, error } = await db()
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+    .eq('ip_hash', ipHash)
+    .gte('created_at', since);
+  if (error) throw error;
+  return count || 0;
+}
+
 export async function markLeadNotified(leadId) {
   const { error } = await db().from('leads').update({ notified: true }).eq('id', leadId);
   if (error) throw error;
@@ -102,7 +116,7 @@ export async function listConversations(limit = 60) {
 export async function listLeads(limit = 100) {
   const { data, error } = await db()
     .from('leads')
-    .select('id, conversation_id, name, email, phone, country_code, note, notified, created_at')
+    .select('id, conversation_id, name, email, phone, country_code, note, notified, flagged, spam_reason, created_at')
     .order('created_at', { ascending: false })
     .limit(limit);
   if (error) throw error;

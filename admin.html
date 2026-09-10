@@ -63,6 +63,11 @@
 .lead-contact a:hover { color: var(--terra); border-color: var(--terra); }
 .lead-note { font-size: 15px; line-height: 1.55; white-space: pre-wrap; border-left: 3px solid var(--terra); padding-left: 14px; margin-bottom: 12px; }
 .lead-foot { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lead-card.flagged { opacity: 0.55; border-style: dashed; box-shadow: none; }
+.lead-card.flagged .lead-note { border-left-color: var(--line-2); }
+.flag.spam { background: var(--ink); color: var(--bone); border-color: var(--ink); }
+.spam-toggle { align-self: flex-start; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; background: none; border: 2px dashed var(--line-2); color: rgba(20,18,16,0.6); padding: 9px 14px; cursor: pointer; }
+.spam-toggle:hover { border-color: var(--ink); color: var(--ink); }
 @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } .list { max-height: 300px; } .thread { min-height: 60vh; } }
 </style>
 </head>
@@ -258,16 +263,49 @@
     parent.appendChild(el);
   }
 
+  let showFlagged = false;
+
   function loadLeads() {
     return api('leads').then(function (data) {
-      const leads = data.leads || [];
+      const all = data.leads || [];
+      const leads = all.filter(function (l) { return !l.flagged; });
+      const spam = all.filter(function (l) { return l.flagged; });
+
       $('leadCount').textContent = leads.length ? ' ' + leads.length : '';
       const host = $('leadsView');
-      if (!leads.length) { host.innerHTML = '<div class="empty">No leads yet.</div>'; return; }
       host.innerHTML = '';
-      leads.forEach(function (l) {
+
+      if (!leads.length && !spam.length) {
+        host.innerHTML = '<div class="empty">No leads yet.</div>';
+        return;
+      }
+      if (!leads.length) host.appendChild(el0('No real leads yet.'));
+
+      leads.forEach(function (l) { host.appendChild(leadCard(l)); });
+
+      if (spam.length) {
+        const bar = document.createElement('button');
+        bar.type = 'button';
+        bar.className = 'spam-toggle';
+        bar.textContent = (showFlagged ? 'Hide' : 'Show') + ' ' + spam.length +
+          ' filtered ' + (spam.length === 1 ? 'message' : 'messages');
+        bar.addEventListener('click', function () { showFlagged = !showFlagged; loadLeads(); });
+        host.appendChild(bar);
+        if (showFlagged) spam.forEach(function (l) { host.appendChild(leadCard(l)); });
+      }
+    });
+  }
+
+  function el0(text) {
+    const d = document.createElement('div');
+    d.className = 'empty';
+    d.textContent = text;
+    return d;
+  }
+
+  function leadCard(l) {
         const el = document.createElement('div');
-        el.className = 'lead-card';
+        el.className = 'lead-card' + (l.flagged ? ' flagged' : '');
         el.innerHTML =
           '<div class="lead-top"><span class="lead-name"></span><span class="lead-when"></span></div>' +
           '<div class="lead-contact"></div><div class="lead-note"></div><div class="lead-foot"></div>';
@@ -286,8 +324,13 @@
 
         const foot = el.querySelector('.lead-foot');
         const flag = document.createElement('span');
-        flag.className = 'flag' + (l.notified ? '' : ' lead');
-        flag.textContent = l.notified ? 'Emailed' : 'Not emailed';
+        if (l.flagged) {
+          flag.className = 'flag spam';
+          flag.textContent = 'Filtered — ' + (l.spam_reason || 'looked like spam');
+        } else {
+          flag.className = 'flag' + (l.notified ? '' : ' lead');
+          flag.textContent = l.notified ? 'Notified' : 'Not notified';
+        }
         foot.appendChild(flag);
         if (l.conversation_id) {
           const link = document.createElement('button');
@@ -297,9 +340,7 @@
           link.addEventListener('click', function () { showTab('chats'); select(l.conversation_id, l.name); });
           foot.appendChild(link);
         }
-        host.appendChild(el);
-      });
-    });
+        return el;
   }
 
   let tab = 'chats';

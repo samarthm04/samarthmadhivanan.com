@@ -36,6 +36,8 @@
 .field textarea { min-height: 150px; resize: vertical; }
 .field input:focus, .field textarea:focus, .field select:focus { outline: 3px solid var(--mustard); outline-offset: 1px; }
 .phone-row { display: grid; grid-template-columns: 108px 1fr; gap: 12px; }
+/* Honeypot — off-screen rather than display:none, which more bots skip. */
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .err { color: var(--terra); font-size: 13px; font-weight: 600; min-height: 20px; }
@@ -126,6 +128,11 @@
       <p class="sub">Fill this in and it lands straight in Samarth's inbox. He usually replies within 24 hours.</p>
 
       <div class="sent" id="sentNote">Got it — that's with Samarth. He'll come back to you, usually within 24 hours. If you'd rather email directly: <strong>samarthm04edu@gmail.com</strong></div>
+
+      <div class="hp" aria-hidden="true">
+        <label for="cWebsite">Website</label>
+        <input type="text" id="cWebsite" name="website" tabindex="-1" autocomplete="off">
+      </div>
 
       <div class="field">
         <label for="cName">Your name</label>
@@ -335,7 +342,8 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name, email: email, note: note,
-          phone: phone, countryCode: phone ? code : ''
+          phone: phone, countryCode: phone ? code : '',
+          website: document.getElementById('cWebsite').value
         })
       });
       const data = await res.json().catch(function () { return {}; });

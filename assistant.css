@@ -177,6 +177,8 @@
 .sa-field textarea { min-height: 62px; resize: vertical; }
 .sa-field input:focus, .sa-field textarea:focus, .sa-field select:focus { outline: 2px solid var(--sa-mustard); outline-offset: 1px; }
 .sa-phone { display: grid; grid-template-columns: 88px 1fr; gap: 7px; }
+/* Honeypot — off-screen rather than display:none, which more bots skip. */
+.sa-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .sa-err { color: var(--sa-terra); font-size: 12px; font-weight: 600; min-height: 16px; margin-bottom: 4px; }
 .sa-form-actions { display: flex; gap: 8px; }
 
