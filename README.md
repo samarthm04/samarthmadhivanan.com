@@ -115,6 +115,12 @@ and emits `[[END_CHAT]]`; the server sets `conversations.status = 'closed'` and 
 further messages on it without calling the model. The prompt explicitly forbids ending a
 chat over poor English, bluntness or confusion.
 
+Abuse submitted through the **note form** closes the conversation too — that text never
+reaches the chat model, so it needs catching separately. The blocklist runs over the name,
+the email local part and the message, against a normalised copy (lowercased, leetspeak
+folded, separators stripped) so `n1gg4` and `f-u-c-k` don't slip through. A slur alone is
+enough to flag. When abuse is detected the model call is skipped entirely.
+
 ## Environment variables
 
 Set these in Vercel → Settings → Environment Variables (and `.env.local` for `vercel dev`).

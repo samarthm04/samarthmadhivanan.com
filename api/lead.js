@@ -1,5 +1,5 @@
 import {
-  saveLead, addMessage, getConversation, markLeadNotified, recentLeadCount,
+  saveLead, addMessage, getConversation, markLeadNotified, recentLeadCount, closeConversation,
 } from './_lib/db.js';
 import { sendLeadNotification } from './_lib/notify.js';
 import { scoreLead, phoneLooksReal } from './_lib/spam.js';
@@ -64,16 +64,28 @@ export default async function handler(req, res) {
 
     const ipHash = hashIp(req);
     const recentCount = await recentLeadCount(ipHash, 60);
+
+    /* Scored before the rate-limit gate: abuse is grounds for ending the
+       conversation, and that shouldn't depend on which limit trips first. */
+    const heuristic = scoreLead({ name, email, phone, countryCode, note, recentCount });
+
+    if (heuristic.abusive && conversationId) {
+      await closeConversation(conversationId);
+      await addMessage(conversationId, 'system', 'Conversation closed — abusive submission.');
+      console.warn(`conversation ${conversationId} closed: abusive lead`);
+    }
+
     if (recentCount >= MAX_LEADS_PER_HOUR) {
       return json(res, 429, {
         error: "That's a few messages in a short time. Try again later, or email " + OWNER_EMAIL + '.',
+        closed: heuristic.abusive,
       });
     }
 
-    /* Two independent opinions: cheap deterministic rules, and the assistant
-       actually reading it. Either can flag; triage fails open. */
-    const heuristic = scoreLead({ name, email, phone, countryCode, note, recentCount });
-    const triage = await triageLead({ name, email, phone, countryCode, note });
+    /* Abuse is already decided; don't spend a model call confirming it. */
+    const triage = heuristic.abusive
+      ? { verdict: 'SPAM', reason: 'abusive submission', ok: true }
+      : await triageLead({ name, email, phone, countryCode, note });
 
     const isSpam =
       heuristic.spam ||
@@ -112,7 +124,7 @@ export default async function handler(req, res) {
     /* Only real-looking leads are worth interrupting Samarth for. */
     if (isSpam) {
       console.warn(`lead flagged (heuristic ${heuristic.score}, ${triage.verdict}): ${lead.spam_reason}`);
-      return json(res, 200, { ok: true, notified: false });
+      return json(res, 200, { ok: true, notified: false, closed: heuristic.abusive });
     }
 
     /* Got through, but the assistant wasn't fully convinced — say so in the ping. */

@@ -212,6 +212,12 @@
 
       form.remove();
 
+      /* Abusive submission — the server has already closed the conversation. */
+      if (result.data.closed) {
+        lock('This conversation has ended.');
+        return;
+      }
+
       /* Read the note back so they can see exactly what was taken down. */
       var summary = 'Noted:\n' + payload.note + '\n\n' + payload.name;
       if (payload.email) summary += '\n' + payload.email;

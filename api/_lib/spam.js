@@ -12,13 +12,32 @@ const DISPOSABLE = [
   'dispostable.com', 'mailnesia.com', 'spam4.me', 'grr.la',
 ];
 
-/* Clearly abusive terms only. Matched case-insensitively as substrings, so keep
-   these specific enough not to hit real words or names. */
+/* Blocklist. Matched against a normalised copy of the text (lowercased, leetspeak
+   folded, non-letters stripped) so "n1gg4" and "f-u-c-k" don't slip through. */
 const ABUSE = [
   'banchod', 'bhenchod', 'behenchod', 'madarchod', 'madharchod', 'chutiya',
-  'chutiye', 'gandu', 'bhosdi', 'lundxx', 'randi',
-  'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'bastard', 'dickhead',
+  'chutiye', 'gandu', 'bhosdi', 'randi', 'lauda', 'harami',
+  'fuck', 'bitch', 'asshole', 'cunt', 'bastard', 'dickhead', 'twat', 'wanker',
+  'motherfucker', 'slut', 'whore', 'retard',
 ];
+
+/* Slurs are an automatic flag on their own, wherever they appear. */
+const SLURS = [
+  'nigger', 'nigga', 'chink', 'gook', 'spic', 'kike', 'paki', 'wetback',
+  'tranny', 'faggot', 'fag', 'dyke', 'coon',
+];
+
+const LEET = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'a', '$': 's' };
+
+/* Fold leetspeak and strip separators so obfuscation doesn't defeat the list. */
+function normalise(text) {
+  return String(text || '')
+    .toLowerCase()
+    .split('')
+    .map((ch) => LEET[ch] || ch)
+    .join('')
+    .replace(/[^a-z]/g, '');
+}
 
 /* National-number digit counts for the codes offered in the form.
    Anything outside these is almost certainly made up. */
@@ -56,12 +75,17 @@ function writtenPart(note) {
 export function scoreLead({ name, email, phone, countryCode, note, recentCount }) {
   const reasons = [];
   let score = 0;
-  const n = (name || '').toLowerCase();
   const message = writtenPart(note);
-  const body = message.toLowerCase();
   const domain = (email || '').split('@')[1] || '';
 
-  if (has(n, ABUSE) || has(body, ABUSE)) { score += 4; reasons.push('abusive language'); }
+  /* Check every field a person can type into, not just the message — the name
+     and the email local part are just as likely to carry the abuse. */
+  const typed = normalise([name, (email || '').split('@')[0], message].join(' '));
+
+  const abusive = has(typed, ABUSE);
+  const slur = has(typed, SLURS);
+  if (slur) { score += 6; reasons.push('slur'); }
+  else if (abusive) { score += 4; reasons.push('abusive language'); }
 
   const words = message.split(/\s+/).filter(Boolean);
   if (message.length < 12) { score += 2; reasons.push('message too short'); }
@@ -77,5 +101,7 @@ export function scoreLead({ name, email, phone, countryCode, note, recentCount }
   if (phone && !phoneLooksReal(phone, countryCode)) { score += 2; reasons.push('implausible phone'); }
   if (recentCount >= 2) { score += 2; reasons.push('repeat submission'); }
 
-  return { score, reasons, spam: score >= 3 };
+  /* `abusive` is surfaced separately: it's grounds for ending the conversation,
+     not just for withholding a notification. */
+  return { score, reasons, spam: score >= 3, abusive: abusive || slur };
 }
