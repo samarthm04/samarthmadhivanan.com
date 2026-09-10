@@ -336,6 +336,8 @@
     btn.textContent = 'Sending…';
 
     let ok = false;
+    let rejected = false;
+    let rejectMsg = '';
     try {
       const res = await fetch('/api/lead', {
         method: 'POST',
@@ -348,11 +350,18 @@
       });
       const data = await res.json().catch(function () { return {}; });
       ok = res.ok;
+      if (ok && data.rejected) { rejected = true; rejectMsg = data.message || ''; }
       if (!ok && data.error) err.textContent = data.error;
     } catch (e) { ok = false; }
 
     btn.disabled = false;
     btn.innerHTML = label;
+
+    /* Declined — tell them, don't fake a confirmation or fall back to mailto. */
+    if (rejected) {
+      err.textContent = rejectMsg;
+      return;
+    }
 
     if (ok) {
       document.getElementById('sentNote').classList.add('is-on');

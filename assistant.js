@@ -212,9 +212,10 @@
 
       form.remove();
 
-      /* Abusive submission — the server has already closed the conversation. */
-      if (result.data.closed) {
-        lock('This conversation has ended.');
+      /* Declined — say so plainly instead of faking a confirmation. */
+      if (result.data.rejected) {
+        bubble('bot', result.data.message || "I'm not able to pass that on.");
+        if (result.data.closed) lock('This conversation has ended.');
         return;
       }
 

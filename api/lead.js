@@ -124,7 +124,22 @@ export default async function handler(req, res) {
     /* Only real-looking leads are worth interrupting Samarth for. */
     if (isSpam) {
       console.warn(`lead flagged (heuristic ${heuristic.score}, ${triage.verdict}): ${lead.spam_reason}`);
-      return json(res, 200, { ok: true, notified: false, closed: heuristic.abusive });
+
+      /* Say so rather than pretending it was delivered. Telling someone their
+         message went through when it didn't is a small lie, and if the filter
+         has misjudged a real person this is what lets them route around it. */
+      const declined = heuristic.abusive
+        ? "I'm not going to pass that on to Samarth. I'll close this chat here."
+        : `I don't think this is something I should pass on to Samarth. If I've got that wrong, email him directly at ${OWNER_EMAIL}.`;
+
+      return json(res, 200, {
+        ok: true,
+        notified: false,
+        rejected: true,
+        message: declined,
+        /* Abuse ends it. A misjudged enquiry can rephrase or email. */
+        closed: heuristic.abusive,
+      });
     }
 
     /* Got through, but the assistant wasn't fully convinced — say so in the ping. */

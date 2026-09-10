@@ -12,32 +12,43 @@ const DISPOSABLE = [
   'dispostable.com', 'mailnesia.com', 'spam4.me', 'grr.la',
 ];
 
-/* Blocklist. Matched against a normalised copy of the text (lowercased, leetspeak
-   folded, non-letters stripped) so "n1gg4" and "f-u-c-k" don't slip through. */
-const ABUSE = [
+/* Blocklists, split by how safely each term can be matched.
+
+   LONG terms are distinctive enough to find anywhere, even with the separators
+   stripped out, so "b-a-n-c-h-o-d" still trips.
+
+   SHORT terms are embedded inside innocent words — "paki" in Pakistan, "spic"
+   in suspicious, "chut" in chutney, "coon" in raccoon — so they are only ever
+   matched as whole words. Getting this wrong silently eats real enquiries,
+   which is far worse than missing a rude one. */
+const ABUSE_LONG = [
   'banchod', 'bhenchod', 'behenchod', 'madarchod', 'madharchod', 'chutiya',
-  'chutiye', 'gandu', 'bhosdi', 'randi', 'lauda', 'harami',
-  'fuck', 'bitch', 'asshole', 'cunt', 'bastard', 'dickhead', 'twat', 'wanker',
-  'motherfucker', 'slut', 'whore', 'retard',
+  'chutiye', 'bhosdi', 'motherfucker', 'dickhead', 'asshole', 'wanker', 'bastard',
 ];
 
-/* Slurs are an automatic flag on their own, wherever they appear. */
-const SLURS = [
-  'nigger', 'nigga', 'chink', 'gook', 'spic', 'kike', 'paki', 'wetback',
-  'tranny', 'faggot', 'fag', 'dyke', 'coon',
-];
+/* Whole word, but a short suffix is allowed: fucking, bitches, shitty. */
+const ABUSE_STEMS = ['fuck', 'shit', 'bitch', 'slut', 'whore', 'twat', 'cunt'];
+
+/* Whole word, exact. No suffix — that's what protects Pakistan and suspicious. */
+const ABUSE_EXACT = ['chut', 'randi', 'gandu', 'lauda', 'harami', 'retard'];
+
+const SLURS_LONG = ['nigger', 'nigga', 'faggot', 'wetback', 'tranny'];
+const SLURS_EXACT = ['paki', 'spic', 'gook', 'chink', 'kike', 'fag', 'dyke', 'coon'];
 
 const LEET = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'a', '$': 's' };
 
-/* Fold leetspeak and strip separators so obfuscation doesn't defeat the list. */
-function normalise(text) {
-  return String(text || '')
-    .toLowerCase()
-    .split('')
-    .map((ch) => LEET[ch] || ch)
-    .join('')
-    .replace(/[^a-z]/g, '');
+function foldLeet(text) {
+  return String(text || '').toLowerCase().split('').map((ch) => LEET[ch] || ch).join('');
 }
+
+/* Letters only — defeats "f-u-c-k" and "n 1 g g a". */
+const collapsed = (text) => foldLeet(text).replace(/[^a-z]/g, '');
+/* Letters and spaces — preserves word boundaries. */
+const spaced = (text) => foldLeet(text).replace(/[^a-z]+/g, ' ').trim();
+
+const anywhere = (text, list) => list.some((w) => text.includes(w));
+const wholeWord = (text, list, suffix) =>
+  list.some((w) => new RegExp(`\\b${w}${suffix ? '\\w{0,3}' : ''}\\b`).test(text));
 
 /* National-number digit counts for the codes offered in the form.
    Anything outside these is almost certainly made up. */
@@ -47,8 +58,6 @@ const PHONE_DIGITS = {
   '+86': [11], '+27': [9], '+55': [10, 11], '+64': [8, 9], '+353': [9],
   '+41': [9], '+46': [9], '+34': [9], '+39': [9, 10], '+7': [10],
 };
-
-const has = (text, list) => list.some((w) => text.includes(w));
 
 export function phoneLooksReal(phone, countryCode) {
   const digits = String(phone || '').replace(/\D/g, '');
@@ -80,10 +89,17 @@ export function scoreLead({ name, email, phone, countryCode, note, recentCount }
 
   /* Check every field a person can type into, not just the message — the name
      and the email local part are just as likely to carry the abuse. */
-  const typed = normalise([name, (email || '').split('@')[0], message].join(' '));
+  const raw = [name, (email || '').split('@')[0], message].join(' ');
+  const flat = collapsed(raw);
+  const wordText = spaced(raw);
 
-  const abusive = has(typed, ABUSE);
-  const slur = has(typed, SLURS);
+  const slur = anywhere(flat, SLURS_LONG) || wholeWord(wordText, SLURS_EXACT, false);
+  const abusive =
+    slur ||
+    anywhere(flat, ABUSE_LONG) ||
+    wholeWord(wordText, ABUSE_STEMS, true) ||
+    wholeWord(wordText, ABUSE_EXACT, false);
+
   if (slur) { score += 6; reasons.push('slur'); }
   else if (abusive) { score += 4; reasons.push('abusive language'); }
 

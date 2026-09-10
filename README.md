@@ -92,6 +92,17 @@ error, timeout or unparseable reply is treated as `GENUINE`, so the system degra
 heuristics-only rather than swallowing real leads. Nothing is ever deleted: flagged
 enquiries stay in the console behind the "Show N filtered" toggle.
 
+A flagged sender is **told**, rather than shown a fake confirmation:
+
+- Abusive → *"I'm not going to pass that on to Samarth. I'll close this chat here."* The
+  conversation closes and the widget locks.
+- Otherwise → *"I don't think this is something I should pass on to Samarth. If I've got
+  that wrong, email him directly at samarthm04edu@gmail.com."* The chat stays open so a
+  misjudged enquiry can rephrase or route around the filter.
+
+This costs a little filter-probing resistance and buys honesty, plus a working escape
+hatch for false positives.
+
 A wrong-length phone number for its country code is rejected outright with a 400 rather
 than flagged, so a real person with a typo gets told.
 
