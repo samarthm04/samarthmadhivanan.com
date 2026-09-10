@@ -204,7 +204,7 @@
       }
 
       if (!result.ok) {
-        err.textContent = result.data.error || 'Could not send. Email samarthm04edu@gmail.com directly.';
+        err.textContent = result.data.error || 'Could not send. Email samarthm04business@gmail.com directly.';
         submit.disabled = false;
         submit.textContent = 'Send to Samarth';
         return;
@@ -250,7 +250,7 @@
     input.focus();
 
     if (!result.ok && !result.data.reply) {
-      bubble('bot', "I can't reach my brain right now. Email samarthm04edu@gmail.com and Samarth will pick it up.");
+      bubble('bot', "I can't reach my brain right now. Email samarthm04business@gmail.com and Samarth will pick it up.");
       return;
     }
 

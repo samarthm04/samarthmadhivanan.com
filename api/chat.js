@@ -21,14 +21,14 @@ const MAX_MESSAGES_PER_WINDOW = 60;
 const FALLBACK_REPLY =
   "I'm having trouble thinking straight just now. Let me take your details and Samarth will come back to you.";
 const CLOSED_REPLY =
-  "This chat's closed. If you'd like to reach Samarth, email samarthm04edu@gmail.com.";
+  "This chat's closed. If you'd like to reach Samarth, email samarthm04business@gmail.com.";
 /* Closed for abuse: no sign-off, and deliberately no email address. Someone who
    behaves like that doesn't get handed a direct line to Samarth. */
 const CLOSED_ABUSE_REPLY = 'This conversation is closed.';
 const ABUSE_REPLY =
   "That's not acceptable, and I won't engage with it. This conversation is over.";
 const THROTTLED_REPLY =
-  "That's a lot of messages in a short space of time. Give it a bit and come back, or email samarthm04edu@gmail.com.";
+  "That's a lot of messages in a short space of time. Give it a bit and come back, or email samarthm04business@gmail.com.";
 
 let anthropic = null;
 function client() {

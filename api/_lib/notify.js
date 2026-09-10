@@ -6,7 +6,7 @@
    the lead is still saved and visible in /admin.html, which is the guaranteed
    record — these are just so you don't have to go look. */
 
-const OWNER_EMAIL = 'samarthm04edu@gmail.com';
+const OWNER_EMAIL = 'samarthm04business@gmail.com';
 
 function esc(s) {
   return String(s == null ? '' : s)

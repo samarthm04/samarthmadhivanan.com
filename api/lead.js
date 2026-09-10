@@ -8,7 +8,7 @@ import {
   json, sanitise, isUuid, hashIp, isValidEmail, isValidPhone, isValidCountryCode,
 } from './_lib/guard.js';
 
-const OWNER_EMAIL = 'samarthm04edu@gmail.com';
+const OWNER_EMAIL = 'samarthm04business@gmail.com';
 const MAX_LEADS_PER_HOUR = 5;
 
 export default async function handler(req, res) {

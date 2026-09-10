@@ -97,7 +97,7 @@ A flagged sender is **told**, rather than shown a fake confirmation:
 - Abusive → *"I'm not going to pass that on to Samarth. I'll close this chat here."* The
   conversation closes and the widget locks.
 - Otherwise → *"I don't think this is something I should pass on to Samarth. If I've got
-  that wrong, email him directly at samarthm04edu@gmail.com."* The chat stays open so a
+  that wrong, email him directly at samarthm04business@gmail.com."* The chat stays open so a
   misjudged enquiry can rephrase or route around the filter.
 
 This costs a little filter-probing resistance and buys honesty, plus a working escape
@@ -163,7 +163,7 @@ either way:
 | Var | Where to get it |
 |---|---|
 | `RESEND_API_KEY` | resend.com → API Keys |
-| `LEAD_NOTIFY_TO` | Defaults to `samarthm04edu@gmail.com` |
+| `LEAD_NOTIFY_TO` | Defaults to `samarthm04business@gmail.com` |
 | `LEAD_NOTIFY_FROM` | Defaults to `onboarding@resend.dev` |
 | `TELEGRAM_BOT_TOKEN` | @BotFather → `/newbot` |
 | `TELEGRAM_CHAT_ID` | `api.telegram.org/bot<TOKEN>/getUpdates` after messaging your bot |
@@ -241,4 +241,4 @@ across `*.html`, `sitemap.xml`, `robots.txt` and `api/_lib/`. Don't do one witho
    something the assistant will confidently repeat.
 8. Submit `sitemap.xml` in Google Search Console; add analytics if wanted.
 
-Contact email is `samarthm04edu@gmail.com`; LinkedIn is `/in/samarth-madhivanan2306`.
+Contact email is `samarthm04business@gmail.com`; LinkedIn is `/in/samarth-madhivanan2306`.
