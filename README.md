@@ -147,8 +147,11 @@ automatically. Add the env vars above, then redeploy.
 
 1. **Domain** — register `samarthmadhivanan.com` and point it at Vercel.
 2. **Env vars** — the assistant and both forms are inert until they're set.
-3. **`og.png`** — referenced by every page's Open Graph tags but not yet generated. Open
-   `og-template.html`, capture the frame at exactly 1200×630, save as `og.png` in the root.
+3. ~~`og.png`~~ — done. To regenerate after editing `og-template.html`:
+
+   ```bash
+   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1 --virtual-time-budget=8000 --window-size=1200,630 --screenshot=og.png "file://$PWD/og-template.html"
+   ```
 4. **Real images** — project cards and the "ticket" photo are CSS placeholders. Add a
    headshot and one image per project.
 5. **Client claims** — verify the KPMG / NPCI / Intel / IndyRX names and the "700M daily
