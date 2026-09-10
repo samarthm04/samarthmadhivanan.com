@@ -63,6 +63,11 @@ export async function getMessages(conversationId, sinceId = 0, limit = 100) {
   return data || [];
 }
 
+export async function markLeadNotified(leadId) {
+  const { error } = await db().from('leads').update({ notified: true }).eq('id', leadId);
+  if (error) throw error;
+}
+
 export async function saveLead(lead) {
   const { data, error } = await db().from('leads').insert(lead).select('id').single();
   if (error) throw error;

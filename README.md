@@ -17,7 +17,8 @@ Personal site — static HTML/CSS/JS, plus Vercel Functions powering **Samarth's
 | `assistant.css` + `assistant.js` | The floating assistant widget |
 | `admin.html` | Password-gated console — watch chats, join as Samarth |
 | `api/chat.js` | Claude proxy. **API key stays server-side.** |
-| `api/lead.js` | Validates + stores a lead, emails via Web3Forms |
+| `api/lead.js` | Validates + stores a lead, hands the browser the email payload |
+| `lead-relay.js` | Delivers that payload to Web3Forms from the browser (see below) |
 | `api/messages.js` | Visitor polls here for Samarth's replies |
 | `api/admin.js` | Console backend (login, list, messages, reply, takeover) |
 | `api/_lib/` | Knowledge base, system prompt, DB client, validation |
@@ -48,6 +49,35 @@ moment anything gets specific it takes a message instead.
 newest first, with leads flagged. Open one and hit **Join as Samarth**: the assistant goes
 silent, the visitor sees "Samarth is here", and anything you type reaches them within ~5s.
 Hit **Leave chat** to hand back.
+
+## How the notification email works
+
+Web3Forms **rejects server-side submissions on the free plan** — posting from a Vercel
+function returns `403 {"success": false, "message": "This method is not allowed. Use our
+API in client side..."}`. It blocks on request origin, before it even checks the key.
+
+So the flow is split:
+
+1. Browser → `POST /api/lead` — server validates and **stores the lead in Supabase**
+   (source of truth; it survives regardless of email).
+2. Server returns a ready-made `notify` payload containing the access key.
+3. Browser → `POST https://api.web3forms.com/submit` (`lead-relay.js`).
+4. Browser → `POST /api/lead {confirmLeadId, delivered}` — flips `leads.notified`.
+
+Web3Forms access keys are designed to be public (their docs put them in a visible hidden
+input), so serving it to the browser is their intended pattern. It stays in the Vercel env
+var rather than the repo, so it's easy to rotate. Downside: someone reading the page source
+could submit to the form directly — Web3Forms rate-limits and there's a `botcheck` honeypot,
+but if it ever gets abused, rotate the key.
+
+**If you'd rather keep the key secret**, swap Web3Forms for a server-side sender like
+Resend (free tier, works from a function; sends to your own address without a verified
+domain). That would mean putting the send back inside `api/lead.js` and dropping
+`lead-relay.js`.
+
+**To check whether an email actually went out**, look at `leads.notified` in Supabase —
+`false` means the lead was captured but delivery failed. The browser console logs the
+Web3Forms error message when it does.
 
 ## Environment variables
 
