@@ -32,9 +32,10 @@
 .form-card .sub { font-size: 15px; color: rgba(20,18,16,0.68); margin-bottom: 26px; }
 .field { margin-bottom: 20px; }
 .field label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: rgba(20,18,16,0.62); margin-bottom: 7px; font-weight: 500; }
-.field input[type=text], .field input[type=email], .field textarea { width: 100%; font-family: 'Inter', sans-serif; font-size: 16px; color: var(--ink); background: var(--cream-2); border: 2px solid var(--ink); padding: 12px 14px; }
+.field input[type=text], .field input[type=email], .field input[type=tel], .field textarea, .field select { width: 100%; font-family: 'Inter', sans-serif; font-size: 16px; color: var(--ink); background: var(--cream-2); border: 2px solid var(--ink); padding: 12px 14px; border-radius: 0; -webkit-appearance: none; appearance: none; }
 .field textarea { min-height: 150px; resize: vertical; }
-.field input:focus, .field textarea:focus { outline: 3px solid var(--mustard); outline-offset: 1px; }
+.field input:focus, .field textarea:focus, .field select:focus { outline: 3px solid var(--mustard); outline-offset: 1px; }
+.phone-row { display: grid; grid-template-columns: 108px 1fr; gap: 12px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .err { color: var(--terra); font-size: 13px; font-weight: 600; min-height: 20px; }
@@ -138,6 +139,34 @@
         <div class="field">
           <label for="cOrg">Company <span style="text-transform:none; letter-spacing:0;">(optional)</span></label>
           <input type="text" id="cOrg" placeholder="Where you work">
+        </div>
+      </div>
+      <div class="field">
+        <label for="cPhone">Phone <span style="text-transform:none; letter-spacing:0;">(optional)</span></label>
+        <div class="phone-row">
+          <select id="cCode" aria-label="Country code">
+            <option value="+91">+91 IN</option>
+            <option value="+1">+1 US</option>
+            <option value="+44">+44 UK</option>
+            <option value="+61">+61 AU</option>
+            <option value="+65">+65 SG</option>
+            <option value="+971">+971 AE</option>
+            <option value="+49">+49 DE</option>
+            <option value="+33">+33 FR</option>
+            <option value="+31">+31 NL</option>
+            <option value="+81">+81 JP</option>
+            <option value="+86">+86 CN</option>
+            <option value="+27">+27 ZA</option>
+            <option value="+55">+55 BR</option>
+            <option value="+64">+64 NZ</option>
+            <option value="+353">+353 IE</option>
+            <option value="+41">+41 CH</option>
+            <option value="+46">+46 SE</option>
+            <option value="+34">+34 ES</option>
+            <option value="+39">+39 IT</option>
+            <option value="+7">+7 RU</option>
+          </select>
+          <input type="tel" id="cPhone" maxlength="20" autocomplete="tel" placeholder="98765 43210">
         </div>
       </div>
       <div class="field">
@@ -263,10 +292,11 @@
 
   const btn = document.getElementById('cSend');
 
-  function mailtoFallback(name, email, org, msg) {
+  function mailtoFallback(name, email, org, phone, msg) {
     const body =
       'Name: ' + name + '\n' +
       'Email: ' + email + '\n' +
+      (phone ? 'Phone: ' + phone + '\n' : '') +
       (org ? 'Company: ' + org + '\n' : '') +
       'Interested in: ' + kind + '\n\n' +
       'The manual process:\n' + msg + '\n';
@@ -279,11 +309,17 @@
     const name = document.getElementById('cName').value.trim();
     const email = document.getElementById('cEmail').value.trim();
     const org = document.getElementById('cOrg').value.trim();
+    const phone = document.getElementById('cPhone').value.trim();
+    const code = document.getElementById('cCode').value;
     const msg = document.getElementById('cMsg').value.trim();
     const err = document.getElementById('cErr');
 
     if (!name) { err.textContent = 'A name helps.'; document.getElementById('cName').focus(); return; }
     if (!email || email.indexOf('@') < 1) { err.textContent = 'Need a valid email to reply to.'; document.getElementById('cEmail').focus(); return; }
+    if (phone && !/^[\d][\d\s-]{4,16}$/.test(phone)) {
+      err.textContent = "That phone number doesn't look right.";
+      document.getElementById('cPhone').focus(); return;
+    }
     if (!msg) { err.textContent = 'Tell me about the process — even two lines.'; document.getElementById('cMsg').focus(); return; }
     err.textContent = '';
 
@@ -297,7 +333,10 @@
       const res = await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, email: email, note: note })
+        body: JSON.stringify({
+          name: name, email: email, note: note,
+          phone: phone, countryCode: phone ? code : ''
+        })
       });
       const data = await res.json().catch(function () { return {}; });
       ok = res.ok;
@@ -313,7 +352,7 @@
       return;
     }
     /* Server unreachable — fall back to the visitor's own mail app. */
-    mailtoFallback(name, email, org, msg);
+    mailtoFallback(name, email, org, phone ? code + ' ' + phone : '', msg);
   });
 })();
 </script>
