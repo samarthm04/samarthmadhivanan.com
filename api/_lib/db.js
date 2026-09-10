@@ -63,6 +63,27 @@ export async function getMessages(conversationId, sinceId = 0, limit = 100) {
   return data || [];
 }
 
+/* Conversations started and messages sent by this visitor in the last N minutes.
+   One round trip; used to stop anyone farming the assistant for tokens. */
+export async function recentActivity(ipHash, minutes) {
+  if (!ipHash) return { conversations: 0, messages: 0 };
+  const { data, error } = await db().rpc('recent_activity', { ip: ipHash, mins: minutes });
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  return {
+    conversations: row?.conversation_count || 0,
+    messages: row?.message_count || 0,
+  };
+}
+
+export async function closeConversation(conversationId) {
+  const { error } = await db()
+    .from('conversations')
+    .update({ status: 'closed' })
+    .eq('id', conversationId);
+  if (error) throw error;
+}
+
 /* How many leads this visitor has sent recently — the rate limit and one of the
    spam signals both use it. */
 export async function recentLeadCount(ipHash, minutes) {
@@ -116,7 +137,7 @@ export async function listConversations(limit = 60) {
 export async function listLeads(limit = 100) {
   const { data, error } = await db()
     .from('leads')
-    .select('id, conversation_id, name, email, phone, country_code, note, notified, flagged, spam_reason, created_at')
+    .select('id, conversation_id, name, email, phone, country_code, note, notified, flagged, spam_reason, triage, created_at')
     .order('created_at', { ascending: false })
     .limit(limit);
   if (error) throw error;

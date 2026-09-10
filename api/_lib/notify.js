@@ -16,13 +16,15 @@ function esc(s) {
 
 function lines(lead) {
   const phone = lead.phone ? `${lead.country_code || ''} ${lead.phone}`.trim() : 'not given';
-  const out = [
+  const out = [];
+  if (lead.caution) out.push(`⚠ ${lead.caution}`, '');
+  out.push(
     `Name:  ${lead.name}`,
     `Email: ${lead.email || 'not given'}`,
     `Phone: ${phone}`,
     '',
-    lead.note,
-  ];
+    lead.note
+  );
   if (lead.conversation_id) {
     out.push('', `Transcript: https://www.samarthmadhivanan.com/admin.html#c/${lead.conversation_id}`);
   }

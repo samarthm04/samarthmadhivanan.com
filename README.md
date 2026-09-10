@@ -77,6 +77,44 @@ the provider's actual error message, and the lead is saved regardless.
 **Telegram setup:** message `@BotFather` → `/newbot` → copy the token. Then message your new
 bot once and open `https://api.telegram.org/bot<TOKEN>/getUpdates` to read your chat id.
 
+## Abuse handling
+
+**Inbound enquiries** are judged twice, independently:
+
+1. `api/_lib/spam.js` — deterministic rules: abusive language, gibberish, links,
+   disposable email domains, per-country phone digit counts, repeat submissions.
+2. `api/_lib/triage.js` — the assistant actually reads it and returns
+   `GENUINE` / `SUSPICIOUS` / `SPAM` with a reason.
+
+Either can flag. `SUSPICIOUS` alone still notifies, with a `⚠` line explaining why;
+`SUSPICIOUS` plus a heuristic score of 2+ is flagged. **Triage fails open** — any API
+error, timeout or unparseable reply is treated as `GENUINE`, so the system degrades to
+heuristics-only rather than swallowing real leads. Nothing is ever deleted: flagged
+enquiries stay in the console behind the "Show N filtered" toggle.
+
+A wrong-length phone number for its country code is rejected outright with a 400 rather
+than flagged, so a real person with a typo gets told.
+
+**The chat itself** is protected against being farmed for tokens:
+
+| Limit | Value |
+|---|---|
+| Messages per IP | 60 / hour |
+| New conversations per IP | 8 / hour |
+| Messages per conversation | 60 |
+| Message length | 1000 chars |
+| History sent to the model | last 16 turns |
+| Leads per IP | 5 / hour |
+
+Rate-limit checks run **before** the model call, so hitting one costs a database query,
+not tokens. Counters come from the `recent_activity` Postgres function.
+
+The assistant can also end a conversation itself — abuse, trolling, repeated off-topic
+pushing, or trying to use it as a general-purpose AI. It writes one civil closing line
+and emits `[[END_CHAT]]`; the server sets `conversations.status = 'closed'` and refuses
+further messages on it without calling the model. The prompt explicitly forbids ending a
+chat over poor English, bluntness or confusion.
+
 ## Environment variables
 
 Set these in Vercel → Settings → Environment Variables (and `.env.local` for `vercel dev`).

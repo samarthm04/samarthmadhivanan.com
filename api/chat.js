@@ -1,7 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { SYSTEM_PROMPT, NOTE_SIGNAL } from './_lib/prompt.js';
+import { SYSTEM_PROMPT, NOTE_SIGNAL, END_SIGNAL } from './_lib/prompt.js';
 import {
   createConversation, getConversation, addMessage, bumpConversation, getMessages,
+  recentActivity, closeConversation,
 } from './_lib/db.js';
 import {
   json, sanitise, hashIp, isUuid,
@@ -10,8 +11,18 @@ import {
 
 const MODEL = 'claude-haiku-4-5';
 
+/* Per-IP ceilings. Generous for a real visitor, useless for anyone trying to
+   farm the assistant for tokens. */
+const WINDOW_MINUTES = 60;
+const MAX_CONVERSATIONS_PER_WINDOW = 8;
+const MAX_MESSAGES_PER_WINDOW = 60;
+
 const FALLBACK_REPLY =
   "I'm having trouble thinking straight just now. Let me take your details and Samarth will come back to you.";
+const CLOSED_REPLY =
+  "This chat's closed. If you'd like to reach Samarth, email samarthm04edu@gmail.com.";
+const THROTTLED_REPLY =
+  "That's a lot of messages in a short space of time. Give it a bit and come back, or email samarthm04edu@gmail.com.";
 
 let anthropic = null;
 function client() {
@@ -40,12 +51,26 @@ export default async function handler(req, res) {
     const message = sanitise(body.message, MAX_MESSAGE_LEN);
     if (!message) return json(res, 400, { error: 'Empty message' });
 
+    const ipHash = hashIp(req);
     let conversationId = isUuid(body.conversationId) ? body.conversationId : null;
     let conversation = conversationId ? await getConversation(conversationId) : null;
 
+    /* Already ended — don't spend anything on it. */
+    if (conversation && conversation.status === 'closed') {
+      return json(res, 200, { conversationId, reply: CLOSED_REPLY, closed: true });
+    }
+
+    const activity = await recentActivity(ipHash, WINDOW_MINUTES);
+    if (activity.messages >= MAX_MESSAGES_PER_WINDOW) {
+      return json(res, 429, { conversationId, reply: THROTTLED_REPLY, throttled: true });
+    }
+    if (!conversation && activity.conversations >= MAX_CONVERSATIONS_PER_WINDOW) {
+      return json(res, 429, { conversationId: null, reply: THROTTLED_REPLY, throttled: true });
+    }
+
     if (!conversation) {
       conversation = await createConversation({
-        ipHash: hashIp(req),
+        ipHash,
         userAgent: req.headers['user-agent'],
       });
       conversationId = conversation.id;
@@ -103,13 +128,28 @@ export default async function handler(req, res) {
     }
 
     const takeNote = text.includes(NOTE_SIGNAL);
-    let reply = text.split(NOTE_SIGNAL).join('').trim();
-    if (!reply) reply = "Let me take your details and Samarth will get back to you.";
+    const ending = text.includes(END_SIGNAL);
+    let reply = text.split(NOTE_SIGNAL).join('').split(END_SIGNAL).join('').trim();
+    if (!reply) {
+      reply = ending ? "I'll leave it there." : 'Let me take your details and Samarth will get back to you.';
+    }
 
     const row = await addMessage(conversationId, 'assistant', reply);
     await bumpConversation(conversationId, 1);
 
-    return json(res, 200, { conversationId, reply, takeNote, lastId: row.id });
+    if (ending) {
+      await closeConversation(conversationId);
+      await addMessage(conversationId, 'system', 'Assistant ended the conversation.');
+      console.warn(`conversation ${conversationId} closed by assistant`);
+    }
+
+    return json(res, 200, {
+      conversationId,
+      reply,
+      takeNote: takeNote && !ending,
+      closed: ending,
+      lastId: row.id,
+    });
   } catch (error) {
     console.error('chat handler', error);
     return json(res, 500, { error: 'Something went wrong' });

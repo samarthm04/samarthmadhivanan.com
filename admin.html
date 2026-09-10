@@ -66,6 +66,7 @@
 .lead-card.flagged { opacity: 0.55; border-style: dashed; box-shadow: none; }
 .lead-card.flagged .lead-note { border-left-color: var(--line-2); }
 .flag.spam { background: var(--ink); color: var(--bone); border-color: var(--ink); }
+.flag.caution { background: var(--rose); }
 .spam-toggle { align-self: flex-start; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; background: none; border: 2px dashed var(--line-2); color: rgba(20,18,16,0.6); padding: 9px 14px; cursor: pointer; }
 .spam-toggle:hover { border-color: var(--ink); color: var(--ink); }
 @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } .list { max-height: 300px; } .thread { min-height: 60vh; } }
@@ -332,6 +333,15 @@
           flag.textContent = l.notified ? 'Notified' : 'Not notified';
         }
         foot.appendChild(flag);
+
+        /* What the assistant made of it, when it wasn't simply convinced. */
+        if (l.triage && !/^GENUINE/.test(l.triage)) {
+          const t = document.createElement('span');
+          t.className = 'flag caution';
+          t.textContent = l.triage;
+          foot.appendChild(t);
+        }
+
         if (l.conversation_id) {
           const link = document.createElement('button');
           link.className = 'btn btn-sm';

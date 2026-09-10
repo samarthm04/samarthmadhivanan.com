@@ -23,6 +23,7 @@
   var busy = false;
   var handover = false;
   var started = false;
+  var locked = false;
   var lastVisitorText = '';
   var pollTimer = null;
 
@@ -101,6 +102,17 @@
     busy = on;
     sendBtn.disabled = on;
     input.disabled = on;
+  }
+
+  /* The assistant ended it, or the visitor hit a rate limit. Stop accepting input. */
+  function lock(reason) {
+    locked = true;
+    input.disabled = true;
+    sendBtn.disabled = true;
+    input.value = '';
+    input.placeholder = '';
+    note(reason);
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   }
 
   /* ── network ── */
@@ -212,7 +224,7 @@
 
   /* ── sending ── */
   async function send(text) {
-    if (busy || !text) return;
+    if (busy || locked || !text) return;
     lastVisitorText = text;
     bubble('visitor', text);
     input.value = '';
@@ -246,6 +258,10 @@
     }
 
     if (result.data.reply) bubble('bot', result.data.reply);
+
+    if (result.data.closed) { lock('This conversation has ended.'); return; }
+    if (result.data.throttled) { lock('Paused — try again in a little while.'); return; }
+
     if (result.data.takeNote) showForm();
     startPolling();
   }

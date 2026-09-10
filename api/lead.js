@@ -3,6 +3,7 @@ import {
 } from './_lib/db.js';
 import { sendLeadNotification } from './_lib/notify.js';
 import { scoreLead, phoneLooksReal } from './_lib/spam.js';
+import { triageLead } from './_lib/triage.js';
 import {
   json, sanitise, isUuid, hashIp, isValidEmail, isValidPhone, isValidCountryCode,
 } from './_lib/guard.js';
@@ -69,7 +70,18 @@ export default async function handler(req, res) {
       });
     }
 
-    const verdict = scoreLead({ name, email, phone, countryCode, note, recentCount });
+    /* Two independent opinions: cheap deterministic rules, and the assistant
+       actually reading it. Either can flag; triage fails open. */
+    const heuristic = scoreLead({ name, email, phone, countryCode, note, recentCount });
+    const triage = await triageLead({ name, email, phone, countryCode, note });
+
+    const isSpam =
+      heuristic.spam ||
+      triage.verdict === 'SPAM' ||
+      (triage.verdict === 'SUSPICIOUS' && heuristic.score >= 2);
+
+    const reasons = heuristic.reasons.slice();
+    if (triage.verdict !== 'GENUINE') reasons.push(`assistant: ${triage.reason}`);
 
     const lead = {
       conversation_id: conversationId,
@@ -79,8 +91,9 @@ export default async function handler(req, res) {
       country_code: phone ? countryCode : null,
       note,
       ip_hash: ipHash,
-      flagged: verdict.spam,
-      spam_reason: verdict.spam ? verdict.reasons.join(', ') : null,
+      flagged: isSpam,
+      spam_reason: isSpam ? reasons.join(', ') : null,
+      triage: `${triage.verdict} — ${triage.reason}`,
     };
 
     /* Always saved — a flagged lead is still visible in the console. */
@@ -91,18 +104,20 @@ export default async function handler(req, res) {
         conversationId,
         'system',
         `Note taken — ${name} | ${email || 'no email'} | ${phone ? `${countryCode} ${phone}` : 'no phone'}` +
-          (verdict.spam ? ` | FLAGGED: ${lead.spam_reason}` : '') +
+          (isSpam ? ` | FLAGGED: ${lead.spam_reason}` : '') +
           `\n${note}`
       );
     }
 
     /* Only real-looking leads are worth interrupting Samarth for. */
-    if (verdict.spam) {
-      console.warn(`lead flagged as spam (${verdict.score}): ${lead.spam_reason}`);
+    if (isSpam) {
+      console.warn(`lead flagged (heuristic ${heuristic.score}, ${triage.verdict}): ${lead.spam_reason}`);
       return json(res, 200, { ok: true, notified: false });
     }
 
-    const result = await sendLeadNotification(lead);
+    /* Got through, but the assistant wasn't fully convinced — say so in the ping. */
+    const caution = triage.verdict === 'SUSPICIOUS' ? `Worth a look first — ${triage.reason}` : null;
+    const result = await sendLeadNotification({ ...lead, caution });
     if (result.delivered) {
       try { await markLeadNotified(saved.id); } catch (e) { console.error('markLeadNotified', e); }
     }
