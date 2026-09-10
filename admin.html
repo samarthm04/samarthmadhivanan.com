@@ -47,6 +47,22 @@
 .reply-row input { flex: 1; min-width: 0; font-family: 'Inter', sans-serif; font-size: 14px; background: var(--bone); border: 2px solid var(--ink); padding: 10px 12px; }
 .empty { padding: 60px 20px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1px; color: rgba(20,18,16,0.5); }
 .hidden { display: none !important; }
+
+.tabs { display: flex; gap: 8px; }
+.tab { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; font-weight: 700; background: var(--bone); color: var(--ink); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: 9px 15px; cursor: pointer; }
+.tab.on { background: var(--forest); color: var(--bone); }
+.tab .count { opacity: 0.6; margin-left: 5px; }
+
+.leads { display: flex; flex-direction: column; gap: 16px; }
+.lead-card { border: 2px solid var(--ink); background: var(--bone); box-shadow: 5px 5px 0 var(--ink); padding: 18px 20px; }
+.lead-top { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.lead-name { font-family: 'Anton', sans-serif; font-size: 24px; text-transform: uppercase; letter-spacing: 0.4px; }
+.lead-when { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.2px; color: rgba(20,18,16,0.5); margin-left: auto; }
+.lead-contact { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.lead-contact a, .lead-contact span { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.5px; color: var(--forest); text-decoration: none; border-bottom: 1px solid var(--forest); }
+.lead-contact a:hover { color: var(--terra); border-color: var(--terra); }
+.lead-note { font-size: 15px; line-height: 1.55; white-space: pre-wrap; border-left: 3px solid var(--terra); padding-left: 14px; margin-bottom: 12px; }
+.lead-foot { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } .list { max-height: 300px; } .thread { min-height: 60vh; } }
 </style>
 </head>
@@ -63,9 +79,16 @@
 <div class="wrap hidden" id="app">
   <div class="top">
     <h1>Assistant <span class="hi-lime">Console</span></h1>
+    <div class="tabs">
+      <button class="tab on" id="tabChats" type="button">Chats</button>
+      <button class="tab" id="tabLeads" type="button">Leads<span class="count" id="leadCount"></span></button>
+    </div>
     <div class="meta" id="stat">—</div>
   </div>
-  <div class="cols">
+
+  <div class="leads hidden" id="leadsView"></div>
+
+  <div class="cols" id="chatsView">
     <div class="list" id="list"><div class="empty">Loading…</div></div>
     <div class="thread">
       <div class="thread-head">
@@ -228,6 +251,69 @@
     if (e.key === 'Enter') { e.preventDefault(); sendReply(); }
   });
 
+  function chip(parent, text, href) {
+    const el = document.createElement(href ? 'a' : 'span');
+    if (href) el.href = href;
+    el.textContent = text;
+    parent.appendChild(el);
+  }
+
+  function loadLeads() {
+    return api('leads').then(function (data) {
+      const leads = data.leads || [];
+      $('leadCount').textContent = leads.length ? ' ' + leads.length : '';
+      const host = $('leadsView');
+      if (!leads.length) { host.innerHTML = '<div class="empty">No leads yet.</div>'; return; }
+      host.innerHTML = '';
+      leads.forEach(function (l) {
+        const el = document.createElement('div');
+        el.className = 'lead-card';
+        el.innerHTML =
+          '<div class="lead-top"><span class="lead-name"></span><span class="lead-when"></span></div>' +
+          '<div class="lead-contact"></div><div class="lead-note"></div><div class="lead-foot"></div>';
+        el.querySelector('.lead-name').textContent = l.name;
+        el.querySelector('.lead-when').textContent = new Date(l.created_at).toLocaleString('en-GB', {
+          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+        });
+        const c = el.querySelector('.lead-contact');
+        if (l.email) chip(c, l.email, 'mailto:' + l.email);
+        if (l.phone) {
+          const full = (l.country_code || '') + ' ' + l.phone;
+          chip(c, full, 'tel:' + full.replace(/\s/g, ''));
+        }
+        if (!l.email && !l.phone) chip(c, 'no contact given');
+        el.querySelector('.lead-note').textContent = l.note;
+
+        const foot = el.querySelector('.lead-foot');
+        const flag = document.createElement('span');
+        flag.className = 'flag' + (l.notified ? '' : ' lead');
+        flag.textContent = l.notified ? 'Emailed' : 'Not emailed';
+        foot.appendChild(flag);
+        if (l.conversation_id) {
+          const link = document.createElement('button');
+          link.className = 'btn btn-sm';
+          link.type = 'button';
+          link.textContent = 'Open transcript';
+          link.addEventListener('click', function () { showTab('chats'); select(l.conversation_id, l.name); });
+          foot.appendChild(link);
+        }
+        host.appendChild(el);
+      });
+    });
+  }
+
+  let tab = 'chats';
+  function showTab(next) {
+    tab = next;
+    $('tabChats').classList.toggle('on', tab === 'chats');
+    $('tabLeads').classList.toggle('on', tab === 'leads');
+    $('chatsView').classList.toggle('hidden', tab !== 'chats');
+    $('leadsView').classList.toggle('hidden', tab !== 'leads');
+    if (tab === 'leads') loadLeads().catch(function () {});
+  }
+  $('tabChats').addEventListener('click', function () { showTab('chats'); });
+  $('tabLeads').addEventListener('click', function () { showTab('leads'); });
+
   function start() {
     $('gate').classList.add('hidden');
     $('app').classList.remove('hidden');
@@ -236,8 +322,10 @@
       if (m) select(m[1]);
     }).catch(function () {});
     if (timer) clearInterval(timer);
+    loadLeads().catch(function () {});
     timer = setInterval(function () {
       if (document.hidden) return;
+      if (tab === 'leads') { loadLeads().catch(function () {}); return; }
       loadThread().catch(function () {});
       loadList().catch(function () {});
     }, 5000);

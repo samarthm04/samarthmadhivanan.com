@@ -99,6 +99,16 @@ export async function listConversations(limit = 60) {
   return data || [];
 }
 
+export async function listLeads(limit = 100) {
+  const { data, error } = await db()
+    .from('leads')
+    .select('id, conversation_id, name, email, phone, country_code, note, notified, created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
+}
+
 export async function setTakeover(conversationId, on) {
   const { error } = await db()
     .from('conversations')

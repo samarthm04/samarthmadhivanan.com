@@ -197,9 +197,6 @@
 
       form.remove();
 
-      /* Web3Forms only accepts browser-side submissions on the free plan. */
-      if (window.saDeliverLead) window.saDeliverLead(result.data);
-
       /* Read the note back so they can see exactly what was taken down. */
       var summary = 'Noted:\n' + payload.note + '\n\n' + payload.name;
       if (payload.email) summary += '\n' + payload.email;

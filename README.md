@@ -15,12 +15,12 @@ Personal site — static HTML/CSS/JS, plus Vercel Functions powering **Samarth's
 | `site.css` | Shared styles (all pages except `index.html`, which is self-contained) |
 | `nav.js` | Mobile nav toggle |
 | `assistant.css` + `assistant.js` | The floating assistant widget |
-| `admin.html` | Password-gated console — watch chats, join as Samarth |
+| `admin.html` | Password-gated console — Chats + Leads, join as Samarth |
 | `api/chat.js` | Claude proxy. **API key stays server-side.** |
-| `api/lead.js` | Validates + stores a lead, hands the browser the email payload |
-| `lead-relay.js` | Delivers that payload to Web3Forms from the browser (see below) |
+| `api/lead.js` | Validates, stores and notifies — one round trip |
 | `api/messages.js` | Visitor polls here for Samarth's replies |
-| `api/admin.js` | Console backend (login, list, messages, reply, takeover) |
+| `api/admin.js` | Console backend (login, conversations, leads, reply, takeover) |
+| `api/_lib/notify.js` | Lead notifications (Resend and/or Telegram) |
 | `api/_lib/` | Knowledge base, system prompt, DB client, validation |
 | `404.html`, `favicon.svg`, `robots.txt`, `sitemap.xml` | Static assets |
 | `og-template.html` | Source for the social share image |
@@ -50,34 +50,32 @@ newest first, with leads flagged. Open one and hit **Join as Samarth**: the assi
 silent, the visitor sees "Samarth is here", and anything you type reaches them within ~5s.
 Hit **Leave chat** to hand back.
 
-## How the notification email works
+## How leads reach you
 
-Web3Forms **rejects server-side submissions on the free plan** — posting from a Vercel
-function returns `403 {"success": false, "message": "This method is not allowed. Use our
-API in client side..."}`. It blocks on request origin, before it even checks the key.
+**The database is the guaranteed record.** Every lead is written to Supabase and shows up
+in `/admin.html` → **Leads** — name, clickable email and phone, the note, and whether a
+notification went out. That works with no third-party service configured at all, and it's
+the only place contact-form leads used to be missing from.
 
-So the flow is split:
+On top of that, `api/_lib/notify.js` sends you a ping. Channels are opt-in by env var,
+independent, and entirely server-side — no key ever reaches the browser:
 
-1. Browser → `POST /api/lead` — server validates and **stores the lead in Supabase**
-   (source of truth; it survives regardless of email).
-2. Server returns a ready-made `notify` payload containing the access key.
-3. Browser → `POST https://api.web3forms.com/submit` (`lead-relay.js`).
-4. Browser → `POST /api/lead {confirmLeadId, delivered}` — flips `leads.notified`.
+| Channel | Set | Notes |
+|---|---|---|
+| **Email** | `RESEND_API_KEY` | Sends from `onboarding@resend.dev` until you own and verify `samarthmadhivanan.com`, then set `LEAD_NOTIFY_FROM` |
+| **Telegram** | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` | Instant push to your phone. No domain needed — useful before the domain is registered |
 
-Web3Forms access keys are designed to be public (their docs put them in a visible hidden
-input), so serving it to the browser is their intended pattern. It stays in the Vercel env
-var rather than the repo, so it's easy to rotate. Downside: someone reading the page source
-could submit to the form directly — Web3Forms rate-limits and there's a `botcheck` honeypot,
-but if it ever gets abused, rotate the key.
+Set either, both, or neither. If one fails the other still fires, the failure is logged with
+the provider's actual error message, and the lead is saved regardless.
 
-**If you'd rather keep the key secret**, swap Web3Forms for a server-side sender like
-Resend (free tier, works from a function; sends to your own address without a verified
-domain). That would mean putting the send back inside `api/lead.js` and dropping
-`lead-relay.js`.
+> Web3Forms was the original choice and was removed: it returns
+> `403 "This method is not allowed. Use our API in client side"` for any server-side
+> submission on the free plan, which forced the access key into the browser and a
+> four-step relay. Resend and Telegram both accept server-side calls, so the flow is now
+> a single request from the visitor.
 
-**To check whether an email actually went out**, look at `leads.notified` in Supabase —
-`false` means the lead was captured but delivery failed. The browser console logs the
-Web3Forms error message when it does.
+**Telegram setup:** message `@BotFather` → `/newbot` → copy the token. Then message your new
+bot once and open `https://api.telegram.org/bot<TOKEN>/getUpdates` to read your chat id.
 
 ## Environment variables
 
@@ -89,9 +87,19 @@ See `.env.example`.
 | `ANTHROPIC_API_KEY` | console.anthropic.com |
 | `SUPABASE_URL` | `https://bedwevhnbjvvfqmnxswg.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → **service_role** (secret) |
-| `WEB3FORMS_ACCESS_KEY` | web3forms.com — enter `samarthm04edu@gmail.com`, it emails a key |
 | `ADMIN_PASSWORD` | You choose. Long. |
 | `IP_SALT` | Any random string |
+
+Optional, for lead notifications (see above) — leads are saved and visible in the console
+either way:
+
+| Var | Where to get it |
+|---|---|
+| `RESEND_API_KEY` | resend.com → API Keys |
+| `LEAD_NOTIFY_TO` | Defaults to `samarthm04edu@gmail.com` |
+| `LEAD_NOTIFY_FROM` | Defaults to `onboarding@resend.dev` |
+| `TELEGRAM_BOT_TOKEN` | @BotFather → `/newbot` |
+| `TELEGRAM_CHAT_ID` | `api.telegram.org/bot<TOKEN>/getUpdates` after messaging your bot |
 
 The database schema is already applied (`conversations`, `messages`, `leads`). RLS is on
 with **no** policies and `anon`/`authenticated` grants revoked, so only the service-role key

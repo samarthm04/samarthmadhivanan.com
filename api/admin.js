@@ -1,5 +1,5 @@
 import {
-  listConversations, getMessages, addMessage, bumpConversation, setTakeover, getConversation,
+  listConversations, listLeads, getMessages, addMessage, bumpConversation, setTakeover, getConversation,
 } from './_lib/db.js';
 import {
   json, sanitise, isUuid, safeEqual, adminToken, requireAdmin,
@@ -26,6 +26,10 @@ export default async function handler(req, res) {
 
     if (action === 'conversations') {
       return json(res, 200, { conversations: await listConversations() });
+    }
+
+    if (action === 'leads') {
+      return json(res, 200, { leads: await listLeads() });
     }
 
     if (action === 'messages') {

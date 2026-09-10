@@ -301,12 +301,7 @@
       });
       const data = await res.json().catch(function () { return {}; });
       ok = res.ok;
-      if (ok) {
-        /* Web3Forms only accepts browser-side submissions on the free plan. */
-        if (window.saDeliverLead) await window.saDeliverLead(data);
-      } else if (data.error) {
-        err.textContent = data.error;
-      }
+      if (!ok && data.error) err.textContent = data.error;
     } catch (e) { ok = false; }
 
     btn.disabled = false;
@@ -324,7 +319,6 @@
 </script>
 <script src="nav.js"></script>
 
-<script src="lead-relay.js" defer></script>
 <script src="assistant.js" defer></script>
 </body>
 </html>
