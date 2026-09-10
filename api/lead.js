@@ -2,7 +2,7 @@ import {
   saveLead, addMessage, getConversation, markLeadNotified, recentLeadCount,
 } from './_lib/db.js';
 import { sendLeadNotification } from './_lib/notify.js';
-import { scoreLead } from './_lib/spam.js';
+import { scoreLead, phoneLooksReal } from './_lib/spam.js';
 import {
   json, sanitise, isUuid, hashIp, isValidEmail, isValidPhone, isValidCountryCode,
 } from './_lib/guard.js';
@@ -46,6 +46,14 @@ export default async function handler(req, res) {
       }
       if (!isValidCountryCode(countryCode)) {
         return json(res, 400, { error: 'Pick a country code.', field: 'countryCode' });
+      }
+      /* Wrong digit count for the country. Reject rather than silently flag, so a
+         real person with a typo is told, and a made-up number never gets through. */
+      if (!phoneLooksReal(phone, countryCode)) {
+        return json(res, 400, {
+          error: `That doesn't look like a valid ${countryCode} number.`,
+          field: 'phone',
+        });
       }
     }
 
