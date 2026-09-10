@@ -24,7 +24,7 @@ function lines(lead) {
     lead.note,
   ];
   if (lead.conversation_id) {
-    out.push('', `Transcript: https://samarthmadhivanan.com/admin.html#c/${lead.conversation_id}`);
+    out.push('', `Transcript: https://www.samarthmadhivanan.com/admin.html#c/${lead.conversation_id}`);
   }
   return out;
 }

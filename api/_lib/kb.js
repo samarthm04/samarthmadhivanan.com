@@ -15,7 +15,7 @@ Usually replies within 24 hours.
 Contact: samarthm04edu@gmail.com
 GitHub: https://github.com/samarthm04
 LinkedIn: https://www.linkedin.com/in/samarth-madhivanan2306
-Site: https://samarthmadhivanan.com
+Site: https://www.samarthmadhivanan.com
 
 ## WHAT HE WORKS ON
 

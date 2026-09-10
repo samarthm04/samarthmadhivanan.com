@@ -143,10 +143,22 @@ static-only checks, but the assistant and contact form need the functions.
 Import the repo on Vercel. No build command, output directory = root; it detects `/api`
 automatically. Add the env vars above, then redeploy.
 
+## Canonical URL
+
+The site serves at **`https://www.samarthmadhivanan.com`** — the apex 308-redirects to
+`www`, which is Vercel's default. Every canonical tag, `og:url`, `sitemap.xml` and
+`robots.txt` uses the `www` form to match.
+
+To switch to the bare apex instead: Vercel → project **samarthmadhivanan** →
+Settings → Domains → make `samarthmadhivanan.com` primary (so `www` redirects to it),
+then find-and-replace `https://www.samarthmadhivanan.com` → `https://samarthmadhivanan.com`
+across `*.html`, `sitemap.xml`, `robots.txt` and `api/_lib/`. Don't do one without the other.
+
 ## Before going live — open items
 
-1. **Domain** — register `samarthmadhivanan.com` and point it at Vercel.
-2. **Env vars** — the assistant and both forms are inert until they're set.
+1. ~~Domain~~ — registered, live, DNS on Vercel nameservers.
+2. **Notification channel** — leads always land in `/admin.html` → Leads, but nothing pings
+   you until `TELEGRAM_BOT_TOKEN`+`TELEGRAM_CHAT_ID` or `RESEND_API_KEY` is set. Redeploy after.
 3. ~~`og.png`~~ — done. To regenerate after editing `og-template.html`:
 
    ```bash
